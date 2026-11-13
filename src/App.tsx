@@ -72,6 +72,14 @@ export default function App() {
   const view: Tab = (desktop && tab === 'games') || (wide && tab === 'prob') ? 'graph' : tab;
 
   useEffect(() => saveGames(games), [games]);
+  // With no games left there is nothing to show: drop the old graph, table and slip
+  // (Clear, or removing the last game). Other edits keep the results until Generate.
+  useEffect(() => {
+    if (games.length === 0) {
+      setGen(null);
+      setPicks([]);
+    }
+  }, [games.length]);
   useEffect(() => savePref('tab', tab), [tab]);
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
