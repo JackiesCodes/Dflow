@@ -161,7 +161,10 @@ export default function App() {
             <Icon d={ICONS.menu} className="size-5" />
           </button>
           <img src="./favicon.svg" alt="" className="size-7" />
-          <h1 className="text-base font-bold tracking-tight sm:text-lg">Betting Slip Outcome Explorer</h1>
+          <div className="leading-tight">
+            <h1 className="text-lg font-bold tracking-tight">Dflow</h1>
+            <p className="hidden text-[11px] text-slate-500 sm:block dark:text-slate-400">Betting slip outcome explorer</p>
+          </div>
         </div>
         <div className="flex items-center gap-5">
           <Stat label="Games" value={games.length} />

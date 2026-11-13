@@ -1,4 +1,6 @@
-# Betting Slip Outcome Explorer
+# Dflow
+
+*Betting slip outcome explorer.*
 
 A client-side web app that generates **every possible outcome combination** for N football games and shows them as an interactive workflow graph and a table.
 
