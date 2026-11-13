@@ -226,7 +226,7 @@ export default function App() {
       {/* Top bar */}
       <header className="flex items-center gap-3 border-b border-ink-950 bg-ink-900 px-3 py-2 text-white sm:px-4 sm:py-2.5 dark:border-ink-800 dark:bg-ink-950">
         <div className="flex min-w-0 items-center gap-2.5">
-          <img src="./favicon.svg" alt="" className="size-8 shrink-0" />
+          <img src="./favicon.svg" alt="Dflow logo" className="size-10 shrink-0" />
           <div className="min-w-0 leading-tight">
             <h1 className="text-lg font-bold tracking-tight">Dflow</h1>
             <p className="truncate text-[11px] text-ink-400">Betting slip outcome explorer</p>
