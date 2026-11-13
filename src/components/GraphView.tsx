@@ -459,13 +459,14 @@ function buildVerticalFlow(gen: Generated, picks: Outcome[], collapsed: Set<numb
 }
 
 /** Full decision tree: one branch per combination prefix, one leaf per slip. */
-function buildTree(gen: Generated, picks: Outcome[]) {
+export function buildTree(gen: Generated, picks: Outcome[]) {
   const n = gen.games.length;
   const nodes: FlowNode[] = [];
   const edges: Edge[] = [];
-  const COL_W = 168;
   const LEAF_H = 32;
   const compact = gen.total > 27;
+  // Column spacing must clear the node width (120px compact, 176px full) plus room for the edges.
+  const COL_W = compact ? 168 : 236;
   const nodeH = compact ? 26 : 52;
   const leafH = compact ? LEAF_H : 68;
 
