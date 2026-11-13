@@ -79,14 +79,14 @@ export function ProbabilityPanel({ gen, picks }: Props) {
               <tr key={d.k} className="border-t border-ink-100 dark:border-ink-800">
                 <td className="py-1 font-semibold tabular-nums">
                   {d.k}/{n}
-                  {d.k === n && <span className="ml-1 text-[10px] font-normal text-gold-600 dark:text-gold-400">win</span>}
+                  {d.k === n && <span className="ml-1 text-[10px] font-normal text-brand-700 dark:text-brand-400">win</span>}
                 </td>
                 <td className="py-1 text-right tabular-nums">{d.count.toLocaleString()}</td>
                 <td className="py-1 pl-3">
                   <div className="flex items-center gap-2">
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
                       <div
-                        className={`h-full rounded-full ${d.k === n ? 'bg-gold-400' : 'bg-brand-700 dark:bg-brand-400'}`}
+                        className={`h-full rounded-full ${d.k === n ? 'bg-brand-500' : 'bg-ink-900 dark:bg-ink-300'}`}
                         style={{ width: `${maxProb ? (d.prob / maxProb) * 100 : 0}%` }}
                       />
                     </div>

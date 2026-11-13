@@ -212,12 +212,12 @@ export default function App() {
   return (
     <div className="flex h-dvh flex-col">
       {/* Top bar */}
-      <header className="flex items-center gap-3 border-b border-brand-900 bg-brand-800 px-3 py-2 text-white sm:px-4 sm:py-2.5 dark:border-ink-800 dark:bg-brand-950">
+      <header className="flex items-center gap-3 border-b border-ink-950 bg-ink-900 px-3 py-2 text-white sm:px-4 sm:py-2.5 dark:border-ink-800 dark:bg-ink-950">
         <div className="flex min-w-0 items-center gap-2.5">
           <img src="./favicon.svg" alt="" className="size-8 shrink-0" />
           <div className="min-w-0 leading-tight">
             <h1 className="text-lg font-bold tracking-tight">Dflow</h1>
-            <p className="truncate text-[11px] text-brand-200">Betting slip outcome explorer</p>
+            <p className="truncate text-[11px] text-ink-400">Betting slip outcome explorer</p>
           </div>
         </div>
 
@@ -226,7 +226,7 @@ export default function App() {
           <Stat label="Games" value={games.length} />
           <Stat label="Total combinations" value={comboLabel} tone={comboTone} />
           {games.length > 0 && (
-            <span className="hidden text-xs text-brand-300 xl:inline" title="Product of active outcomes per game">
+            <span className="hidden text-xs text-ink-400 xl:inline" title="Product of active outcomes per game">
               = {games.map((g) => g.active.filter(Boolean).length).join(' × ')}
             </span>
           )}
@@ -237,9 +237,9 @@ export default function App() {
           <span
             className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums lg:hidden ${
               comboTone === 'error'
-                ? 'bg-away text-white'
+                ? 'bg-flame-600 text-white'
                 : comboTone === 'warn'
-                  ? 'bg-gold-400 text-brand-950'
+                  ? 'bg-gold-400 text-ink-950'
                   : 'bg-white/10 text-white ring-1 ring-white/15'
             }`}
             title="Total combinations"
@@ -247,7 +247,7 @@ export default function App() {
             {comboLabel} slips
           </span>
           {stale && (
-            <span className="hidden rounded-full bg-gold-400/15 px-2 py-0.5 text-xs font-medium text-gold-300 ring-1 ring-gold-400/30 lg:inline">
+            <span className="hidden rounded-full bg-brand-500/15 px-2 py-0.5 text-xs font-medium text-brand-300 ring-1 ring-brand-500/30 lg:inline">
               Inputs changed
             </span>
           )}
@@ -256,7 +256,7 @@ export default function App() {
               <Icon d={ICONS.play} className="size-3.5" /> {busy ? 'Generating…' : 'Generate'}
             </Button>
           </span>
-          <Button variant="ghost" className="!px-2.5 !text-brand-100 hover:!bg-white/10" onClick={() => setDark((d) => !d)} aria-label="Toggle dark mode" title="Toggle dark mode">
+          <Button variant="ghost" className="!px-2.5 !text-ink-200 hover:!bg-white/10" onClick={() => setDark((d) => !d)} aria-label="Toggle dark mode" title="Toggle dark mode">
             <Icon d={dark ? ICONS.sun : ICONS.moon} />
           </Button>
         </div>
@@ -293,7 +293,7 @@ export default function App() {
                 onClick={() => setTab(t.id)}
                 className={`-mb-px border-b-2 px-3 py-2.5 text-sm font-medium ${t.className ?? ''} ${
                   view === t.id
-                    ? 'border-brand-800 text-brand-800 dark:border-brand-400 dark:text-brand-300'
+                    ? 'border-brand-500 text-ink-900 dark:border-brand-500 dark:text-white'
                     : 'border-transparent text-ink-500 hover:text-ink-800 dark:text-ink-400 dark:hover:text-ink-200'
                 }`}
               >
@@ -349,16 +349,16 @@ export default function App() {
               aria-selected={active}
               onClick={() => setTab(t.id)}
               className={`relative flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${
-                active ? 'text-brand-800 dark:text-brand-300' : 'text-ink-500 dark:text-ink-400'
+                active ? 'text-ink-900 dark:text-white' : 'text-ink-500 dark:text-ink-400'
               }`}
             >
-              {active && <span className="absolute inset-x-6 top-0 h-0.5 rounded-full bg-brand-800 dark:bg-brand-400" />}
+              {active && <span className="absolute inset-x-6 top-0 h-0.5 rounded-full bg-brand-500" />}
               <span className="relative">
                 <Icon d={t.icon} className="size-5" />
                 {t.badge && (
                   <span
                     className={`absolute -right-3 -top-1.5 min-w-4 rounded-full px-1 text-center text-[10px] leading-4 font-bold ${
-                      t.badge === '•' ? 'bg-gold-400 text-brand-950' : 'bg-ink-200 text-ink-700 dark:bg-ink-700 dark:text-ink-200'
+                      t.badge === '•' ? 'bg-brand-500 text-ink-950' : 'bg-ink-200 text-ink-700 dark:bg-ink-700 dark:text-ink-200'
                     }`}
                   >
                     {t.badge === '•' ? '!' : t.badge}
@@ -420,9 +420,9 @@ export default function App() {
 function SlipBar({ gen, picks, row, onRandom }: { gen: Generated; picks: Outcome[]; row: number; onRandom: () => void }) {
   const shown = picks.slice(0, 12);
   return (
-    <div className="flex items-center gap-2 border-b border-ink-200 bg-brand-50/60 px-3 py-1.5 text-xs dark:border-ink-800 dark:bg-brand-950/30">
+    <div className="flex items-center gap-2 border-b border-ink-200 bg-brand-50/70 px-3 py-1.5 text-xs dark:border-ink-800 dark:bg-brand-950/30">
       <div className="flex shrink-0 flex-col leading-tight lg:flex-row lg:items-center lg:gap-2">
-        <span className="font-semibold text-brand-800 dark:text-brand-200">Slip #{(row + 1).toLocaleString()}</span>
+        <span className="font-semibold text-ink-900 dark:text-white">Slip #{(row + 1).toLocaleString()}</span>
         <span className="tabular-nums text-ink-500 lg:hidden dark:text-ink-400">{formatPct(gen.rowProb[row] ?? 0)}</span>
       </div>
       {/* Phones: compact coloured chips. Desktop: full pick names. */}
@@ -447,9 +447,9 @@ function EmptyState({ hasGames, onAdd, onSample, onGenerate }: { hasGames: boole
     <div className="flex h-full items-center justify-center p-8">
       <div className="max-w-sm text-center">
         <div className="mx-auto mb-4 flex w-fit gap-2">
-          <span className="size-3 rounded-full bg-brand-400" />
-          <span className="size-3 rounded-full bg-gold-400" />
-          <span className="size-3 rounded-full bg-flame-500" />
+          <span className="size-3 rounded-full bg-brand-500" />
+          <span className="size-3 rounded-full bg-white ring-1 ring-ink-400" />
+          <span className="size-3 rounded-full bg-ink-900 dark:ring-1 dark:ring-ink-400" />
         </div>
         <h2 className="text-lg font-semibold">{hasGames ? 'Ready when you are' : 'No games yet'}</h2>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">

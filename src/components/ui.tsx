@@ -5,32 +5,32 @@ export const OUTCOME_STYLES: Record<
   Outcome,
   { solid: string; soft: string; ring: string; dot: string; dotText: string; hex: string }
 > = {
-  // 1 — Home: sky blue
+  // 1 — Home: pitch green
   0: {
-    solid: 'bg-brand-400 text-brand-950 border-brand-400',
-    soft: 'bg-brand-50 text-brand-800 border-brand-300 dark:bg-brand-950/70 dark:text-brand-200 dark:border-brand-700',
-    ring: 'ring-brand-400/40',
-    dot: 'bg-brand-400',
-    dotText: 'text-brand-950',
-    hex: '#6caddf',
+    solid: 'bg-brand-500 text-ink-950 border-brand-500',
+    soft: 'bg-brand-50 text-brand-900 border-brand-300 dark:bg-brand-950/70 dark:text-brand-200 dark:border-brand-800',
+    ring: 'ring-brand-500/40',
+    dot: 'bg-brand-500',
+    dotText: 'text-ink-950',
+    hex: 'var(--outcome-0)',
   },
-  // X — Draw: gold
+  // X — Draw: white, outlined
   1: {
-    solid: 'bg-gold-400 text-brand-950 border-gold-400',
-    soft: 'bg-gold-50 text-gold-800 border-gold-300 dark:bg-gold-950/70 dark:text-gold-200 dark:border-gold-700',
-    ring: 'ring-gold-400/40',
-    dot: 'bg-gold-400',
-    dotText: 'text-brand-950',
-    hex: '#d4a11e',
+    solid: 'bg-white text-ink-950 border-ink-900 dark:border-white',
+    soft: 'bg-white text-ink-700 border-ink-300 dark:bg-ink-800 dark:text-ink-100 dark:border-ink-600',
+    ring: 'ring-ink-400/40',
+    dot: 'bg-white ring-1 ring-inset ring-ink-400',
+    dotText: 'text-ink-950',
+    hex: 'var(--outcome-1)',
   },
-  // 2 — Away: red
+  // 2 — Away: black
   2: {
-    solid: 'bg-away text-white border-away',
-    soft: 'bg-flame-50 text-flame-700 border-flame-200 dark:bg-flame-950/70 dark:text-flame-200 dark:border-flame-800',
-    ring: 'ring-flame-500/40',
-    dot: 'bg-away',
+    solid: 'bg-ink-900 text-white border-ink-900 dark:bg-ink-950 dark:border-ink-300',
+    soft: 'bg-ink-200 text-ink-900 border-ink-400 dark:bg-ink-950 dark:text-ink-200 dark:border-ink-500',
+    ring: 'ring-ink-900/25 dark:ring-ink-300/40',
+    dot: 'bg-ink-900 dark:bg-ink-950 dark:ring-1 dark:ring-inset dark:ring-ink-400',
     dotText: 'text-white',
-    hex: '#ee3124',
+    hex: 'var(--outcome-2)',
   },
 };
 
@@ -38,8 +38,8 @@ type Variant = 'primary' | 'cta' | 'secondary' | 'ghost' | 'danger';
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    'bg-brand-800 text-white hover:bg-brand-700 shadow-sm dark:bg-brand-400 dark:text-brand-950 dark:hover:bg-brand-300',
-  cta: 'bg-gold-400 font-semibold text-brand-900 hover:bg-gold-300 shadow-sm',
+    'bg-ink-900 text-white hover:bg-ink-700 shadow-sm dark:bg-brand-500 dark:text-ink-950 dark:hover:bg-brand-400',
+  cta: 'bg-brand-500 font-semibold text-ink-950 hover:bg-brand-400 shadow-sm',
   secondary:
     'border border-ink-300 bg-white text-ink-700 hover:bg-ink-100 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:bg-ink-800',
   ghost: 'text-ink-600 hover:bg-ink-200/70 dark:text-ink-300 dark:hover:bg-ink-800',
@@ -63,11 +63,11 @@ export function Button({
 }
 
 export function Stat({ label, value, tone }: { label: string; value: ReactNode; tone?: 'warn' | 'error' }) {
-  // Rendered on the navy header bar.
-  const color = tone === 'error' ? 'text-flame-300' : tone === 'warn' ? 'text-gold-400' : 'text-white';
+  // Rendered on the dark header bar.
+  const color = tone === 'error' ? 'text-flame-300' : tone === 'warn' ? 'text-gold-300' : 'text-white';
   return (
     <div className="flex flex-col leading-tight">
-      <span className="text-[11px] font-medium uppercase tracking-wide text-brand-200">{label}</span>
+      <span className="text-[11px] font-medium uppercase tracking-wide text-ink-400">{label}</span>
       <span className={`font-semibold tabular-nums ${color}`}>{value}</span>
     </div>
   );
@@ -91,7 +91,7 @@ export function SlipChips({ picks, className = '', size = 'md' }: { picks: Array
   return (
     <span className={`flex items-center gap-1 overflow-hidden ${className}`} aria-label={items.map((o) => OUTCOME_SYMBOL_MAP[o]).join('-')}>
       {items.map((o, i) => (
-        <span key={i} className={`inline-flex shrink-0 items-center justify-center rounded-md px-1 font-bold ${dim} ${OUTCOME_STYLES[o].solid}`}>
+        <span key={i} className={`inline-flex shrink-0 items-center justify-center rounded-md border px-1 font-bold ${dim} ${OUTCOME_STYLES[o].solid}`}>
           {OUTCOME_SYMBOL_MAP[o]}
         </span>
       ))}

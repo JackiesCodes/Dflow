@@ -325,7 +325,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
                     aria-pressed={selected}
                     className={`flex h-full w-full items-center gap-3 rounded-xl border px-3 text-left ${
                       selected
-                        ? 'border-brand-400 bg-brand-50 ring-2 ring-brand-700/30 dark:border-brand-700 dark:bg-brand-950/60'
+                        ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-500/30 dark:border-brand-600 dark:bg-brand-950/60'
                         : 'border-ink-200 bg-white active:bg-ink-100 dark:border-ink-800 dark:bg-ink-900 dark:active:bg-ink-800'
                     }`}
                   >
@@ -371,7 +371,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
                         title={`Sort by ${String(h.column.columnDef.header)}`}
                       >
                         <span className="truncate">{flexRender(h.column.columnDef.header, h.getContext())}</span>
-                        <span className="text-brand-700 dark:text-brand-400">{sorted === 'asc' ? '▲' : sorted === 'desc' ? '▼' : ''}</span>
+                        <span className="text-brand-600 dark:text-brand-400">{sorted === 'asc' ? '▲' : sorted === 'desc' ? '▼' : ''}</span>
                       </button>
                       {game !== undefined && (
                         <select

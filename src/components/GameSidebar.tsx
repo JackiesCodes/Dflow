@@ -53,7 +53,7 @@ export function GameSidebar({ games, onChange, onAdd, onLoadSample, onClear }: P
       </div>
 
       <div className="flex gap-2 border-t border-ink-200 p-3 dark:border-ink-800">
-        <Button variant="secondary" className="flex-1 !h-11 sm:!h-9 lg:!border-transparent lg:!bg-brand-800 lg:!text-white lg:hover:!bg-brand-700 dark:lg:!bg-brand-400 dark:lg:!text-brand-950 dark:lg:hover:!bg-brand-300" onClick={() => onAdd(1)}>
+        <Button variant="secondary" className="flex-1 !h-11 sm:!h-9 lg:!border-transparent lg:!bg-ink-900 lg:!text-white lg:hover:!bg-ink-700 dark:lg:!bg-brand-500 dark:lg:!text-ink-950 dark:lg:hover:!bg-brand-400" onClick={() => onAdd(1)}>
           <Icon d={ICONS.plus} /> Add game
         </Button>
         <Button className="!h-11 sm:!h-9" onClick={() => onAdd(5)} title="Add 5 empty games">
@@ -156,7 +156,7 @@ function GameCard({
           onClick={() => setShowWeights((s) => !s)}
           className={`flex size-10 shrink-0 items-center justify-center rounded-lg border sm:size-8 sm:rounded-md ${
             customWeights
-              ? 'border-brand-400 text-brand-800 dark:text-brand-300'
+              ? 'border-brand-500 text-brand-700 dark:text-brand-300'
               : 'border-ink-300 text-ink-500 dark:border-ink-700'
           } hover:bg-ink-100 dark:hover:bg-ink-800`}
           aria-expanded={showWeights}

@@ -7,32 +7,33 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* Brand blues: sky (400) → navy (800) */
-  --color-brand-50: #eef6fc;
-  --color-brand-100: #d9eaf8;
-  --color-brand-200: #b7d7f0;
-  --color-brand-300: #92c2e8;
-  --color-brand-400: #6caddf;
-  --color-brand-500: #3e88c6;
-  --color-brand-600: #1d64a3;
-  --color-brand-700: #0b4683;
-  --color-brand-800: #00285e;
-  --color-brand-900: #001d46;
-  --color-brand-950: #00122e;
+  /* Brand: pitch green (500) */
+  --color-brand-50: #f4faeb;
+  --color-brand-100: #e6f3d3;
+  --color-brand-200: #cfe8ab;
+  --color-brand-300: #b2d97b;
+  --color-brand-400: #9ccd56;
+  --color-brand-500: #8bc43f;
+  --color-brand-600: #6fa52c;
+  --color-brand-700: #557f22;
+  --color-brand-800: #42631d;
+  --color-brand-900: #38531c;
+  --color-brand-950: #1c2e0a;
 
-  /* Navy-tinted neutrals */
-  --color-ink-50: #f5f8fc;
-  --color-ink-100: #eaf0f7;
-  --color-ink-200: #d7e0ec;
-  --color-ink-300: #b5c3d6;
-  --color-ink-400: #8597b0;
-  --color-ink-500: #5e708b;
-  --color-ink-600: #45566f;
-  --color-ink-700: #2d3e59;
-  --color-ink-800: #1b2c48;
-  --color-ink-900: #0f1e38;
-  --color-ink-950: #081428;
+  /* Neutrals, ending in the near-black #231f20 */
+  --color-ink-50: #f8f8f8;
+  --color-ink-100: #f1f1f0;
+  --color-ink-200: #e3e2e2;
+  --color-ink-300: #cbcaca;
+  --color-ink-400: #a3a1a1;
+  --color-ink-500: #7a7778;
+  --color-ink-600: #5a5758;
+  --color-ink-700: #403c3d;
+  --color-ink-800: #2e2a2b;
+  --color-ink-900: #231f20;
+  --color-ink-950: #161314;
 
+  /* Gold and red are only used for warnings and errors */
   /* Gold: light (400) and dark (500) */
   --color-gold-50: #fff9eb;
   --color-gold-100: #ffefc6;
@@ -58,9 +59,18 @@
   --color-flame-800: #6d140a;
   --color-flame-900: #430c06;
   --color-flame-950: #2b0804;
+}
 
-  /* Slightly deeper red behind white text (≥ 4.5:1 contrast) */
-  --color-away: #d62617;
+:root {
+  /* Highlighted path colours in the graph (1 / X / 2) */
+  --outcome-0: #6fa52c;
+  --outcome-1: #a3a1a1;
+  --outcome-2: #231f20;
+}
+.dark {
+  --outcome-0: #8bc43f;
+  --outcome-1: #f1f1f0;
+  --outcome-2: #a3a1a1;
 }
 
 html,
@@ -76,19 +86,19 @@ body {
 /* React Flow theming */
 .react-flow {
   --xy-background-color: transparent;
-  --xy-edge-stroke: #b5c3d6;
+  --xy-edge-stroke: #cbcaca;
   --xy-controls-button-background-color: #ffffff;
-  --xy-controls-button-border-color: #d7e0ec;
-  --xy-controls-button-color: #00285e;
-  --xy-background-pattern-color: #d7e0ec;
+  --xy-controls-button-border-color: #e3e2e2;
+  --xy-controls-button-color: #231f20;
+  --xy-background-pattern-color: #e3e2e2;
 }
 .dark .react-flow {
-  --xy-edge-stroke: #2d3e59;
-  --xy-controls-button-background-color: #0f1e38;
-  --xy-controls-button-background-color-hover: #1b2c48;
-  --xy-controls-button-color: #d7e0ec;
-  --xy-controls-button-border-color: #2d3e59;
-  --xy-background-pattern-color: #1b2c48;
+  --xy-edge-stroke: #403c3d;
+  --xy-controls-button-background-color: #231f20;
+  --xy-controls-button-background-color-hover: #2e2a2b;
+  --xy-controls-button-color: #e3e2e2;
+  --xy-controls-button-border-color: #403c3d;
+  --xy-background-pattern-color: #2e2a2b;
 }
 .react-flow__attribution {
   background: transparent;
@@ -101,4 +111,4 @@ body {
 .animate-toast { animation: toast-in 160ms ease-out; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: rgb(133 151 176 / 0.4); border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: rgb(163 161 161 / 0.45); border-radius: 8px; }

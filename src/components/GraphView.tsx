@@ -89,7 +89,7 @@ const CollapsedNode = memo(({ data }: NodeProps<Node<CollapsedData, 'collapsed'>
   <div
     className={`flex h-[52px] ${data.vertical ? 'w-[112px]' : 'w-[120px]'} flex-col items-center justify-center rounded-lg border-2 border-dashed text-xs ${
       data.onPath
-        ? 'border-brand-500 bg-brand-50 text-brand-800 dark:border-brand-400 dark:bg-brand-950/60 dark:text-brand-200'
+        ? 'border-brand-600 bg-brand-50 text-brand-900 dark:border-brand-500 dark:bg-brand-950/60 dark:text-brand-200'
         : 'border-ink-300 bg-white text-ink-600 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-300'
     }`}
     title="Collapsed column — click the header to expand"
@@ -116,7 +116,7 @@ const HeaderNode = memo(({ data }: NodeProps<Node<HeaderData, 'header'>>) =>
   ) : (
   <div
     className={`w-[176px] rounded-lg border border-ink-200 bg-white/90 px-3 py-1.5 text-xs shadow-sm dark:border-ink-700 dark:bg-ink-900/90 ${
-      data.canCollapse ? 'cursor-pointer hover:border-brand-400' : ''
+      data.canCollapse ? 'cursor-pointer hover:border-brand-500' : ''
     } ${data.collapsed || data.narrow ? '!w-[120px]' : ''}`}
     title={data.canCollapse ? (data.collapsed ? 'Expand column' : 'Collapse column') : undefined}
   >
@@ -201,7 +201,7 @@ export function GraphView({ gen, picks, onSelect, dark, vertical = false }: Prop
             type="button"
             disabled={!treeAllowed}
             onClick={() => setMode('tree')}
-            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'tree' ? 'bg-brand-800 text-white dark:bg-brand-400 dark:text-brand-950' : 'text-ink-600 dark:text-ink-300'} disabled:opacity-40`}
+            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'tree' ? 'bg-ink-900 text-white dark:bg-brand-500 dark:text-ink-950' : 'text-ink-600 dark:text-ink-300'} disabled:opacity-40`}
             title={treeAllowed ? 'Every path drawn as its own branch' : `Tree view is limited to ${TREE_LIMIT} combinations`}
           >
             <span className="sm:hidden">Tree</span>
@@ -210,7 +210,7 @@ export function GraphView({ gen, picks, onSelect, dark, vertical = false }: Prop
           <button
             type="button"
             onClick={() => setMode('flow')}
-            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'flow' ? 'bg-brand-800 text-white dark:bg-brand-400 dark:text-brand-950' : 'text-ink-600 dark:text-ink-300'}`}
+            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'flow' ? 'bg-ink-900 text-white dark:bg-brand-500 dark:text-ink-950' : 'text-ink-600 dark:text-ink-300'}`}
             title="Compact layered flow — scales to any number of games"
           >
             <span className="sm:hidden">Flow</span>
