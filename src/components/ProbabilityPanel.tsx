@@ -1,0 +1,113 @@
+import { useMemo } from 'react';
+import { correctPicksDistribution, formatOneIn, formatPct, pickLabel, rowIndexOf } from '../lib/combinatorics';
+import type { Generated, Outcome } from '../lib/types';
+import { OUTCOME_SYMBOL } from '../lib/types';
+import { OutcomePill } from './ui';
+
+interface Props {
+  gen: Generated;
+  picks: Outcome[];
+}
+
+export function ProbabilityPanel({ gen, picks }: Props) {
+  const n = gen.games.length;
+  const row = rowIndexOf(gen, picks);
+  const slipProb = row >= 0 ? gen.rowProb[row] : 0;
+  const dist = useMemo(() => correctPicksDistribution(gen, picks), [gen, picks]);
+  const uniform = gen.probs.every((p) => {
+    const act = p.filter((x) => x > 0);
+    return act.every((x) => Math.abs(x - act[0]) < 1e-12);
+  });
+  const maxProb = Math.max(...dist.map((d) => d.prob));
+
+  // Most-likely slip: best outcome per game.
+  const best = gen.probs.map((p, g) => gen.activeByGame[g].reduce((a, b) => (p[b] > p[a] ? b : a)));
+  const bestProb = best.reduce<number>((acc, o, g) => acc * gen.probs[g][o], 1);
+
+  return (
+    <div className="space-y-4 p-4 text-sm">
+      <section>
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Selected slip</h3>
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-900 dark:bg-indigo-950/50">
+          <div className="text-xs text-indigo-700 dark:text-indigo-300">Chance of winning slip #{(row + 1).toLocaleString()}</div>
+          <div className="text-2xl font-bold tabular-nums text-indigo-900 dark:text-white">{formatPct(slipProb)}</div>
+          <div className="text-xs text-indigo-700/80 dark:text-indigo-300/80">{formatOneIn(slipProb)}</div>
+        </div>
+        <ul className="mt-2 space-y-1">
+          {gen.games.map((game, g) => (
+            <li key={game.id} className="flex items-center justify-between gap-2 text-xs">
+              <span className="truncate text-slate-500 dark:text-slate-400">
+                G{g + 1} {game.home || 'Home'} v {game.away || 'Away'}
+              </span>
+              <span className="flex shrink-0 items-center gap-1.5">
+                <OutcomePill outcome={picks[g]} label={`${OUTCOME_SYMBOL[picks[g]]} ${pickLabel(game, picks[g])}`} />
+                <span className="w-11 text-right tabular-nums text-slate-500">{(gen.probs[g][picks[g]] * 100).toFixed(1)}%</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="grid grid-cols-2 gap-2">
+        <Metric label="Combinations" value={gen.total.toLocaleString()} />
+        <Metric
+          label={uniform ? 'Each combination' : 'Equal-odds slip'}
+          value={uniform ? formatPct(1 / gen.total) : formatPct(gen.activeByGame.reduce<number>((a, act) => a / act.length, 1))}
+          hint={uniform ? `Π (1 / active outcomes)` : 'if all outcomes were equal'}
+        />
+        {!uniform && <Metric label="Most likely slip" value={formatPct(bestProb)} hint={best.map((o) => OUTCOME_SYMBOL[o]).join('-')} />}
+        <Metric label="Play every slip" value="100%" hint={`${gen.total.toLocaleString()} slips guarantee a winner`} />
+      </section>
+
+      <section>
+        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Exactly K correct picks
+        </h3>
+        <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+          For the selected slip: how many of the {gen.total.toLocaleString()} possible results give exactly K hits, and how likely that is.
+        </p>
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-left text-slate-500 dark:text-slate-400">
+              <th className="py-1 font-medium">K</th>
+              <th className="py-1 text-right font-medium">Results</th>
+              <th className="py-1 pl-3 font-medium">Chance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...dist].reverse().map((d) => (
+              <tr key={d.k} className="border-t border-slate-100 dark:border-slate-800">
+                <td className="py-1 font-semibold tabular-nums">
+                  {d.k}/{n}
+                  {d.k === n && <span className="ml-1 text-[10px] font-normal text-green-600 dark:text-green-400">win</span>}
+                </td>
+                <td className="py-1 text-right tabular-nums">{d.count.toLocaleString()}</td>
+                <td className="py-1 pl-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                      <div
+                        className={`h-full rounded-full ${d.k === n ? 'bg-green-500' : 'bg-indigo-500'}`}
+                        style={{ width: `${maxProb ? (d.prob / maxProb) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <span className="w-[4.5rem] whitespace-nowrap text-right tabular-nums">{formatPct(d.prob)}</span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
+
+function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 p-2.5 dark:border-slate-800">
+      <div className="text-[11px] text-slate-500 dark:text-slate-400">{label}</div>
+      <div className="font-semibold tabular-nums">{value}</div>
+      {hint && <div className="truncate text-[10px] text-slate-400" title={hint}>{hint}</div>}
+    </div>
+  );
+}
