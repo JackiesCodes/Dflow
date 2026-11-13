@@ -27,21 +27,21 @@ export function ProbabilityPanel({ gen, picks }: Props) {
   return (
     <div className="space-y-4 p-4 text-sm">
       <section>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Selected slip</h3>
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-900 dark:bg-indigo-950/50">
-          <div className="text-xs text-indigo-700 dark:text-indigo-300">Chance of winning slip #{(row + 1).toLocaleString()}</div>
-          <div className="text-2xl font-bold tabular-nums text-indigo-900 dark:text-white">{formatPct(slipProb)}</div>
-          <div className="text-xs text-indigo-700/80 dark:text-indigo-300/80">{formatOneIn(slipProb)}</div>
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">Selected slip</h3>
+        <div className="rounded-xl border border-brand-200 bg-brand-50 p-3 dark:border-brand-900 dark:bg-brand-950/50">
+          <div className="text-xs text-brand-800 dark:text-brand-300">Chance of winning slip #{(row + 1).toLocaleString()}</div>
+          <div className="text-2xl font-bold tabular-nums text-brand-900 dark:text-white">{formatPct(slipProb)}</div>
+          <div className="text-xs text-brand-800/80 dark:text-brand-300/80">{formatOneIn(slipProb)}</div>
         </div>
         <ul className="mt-2 space-y-1">
           {gen.games.map((game, g) => (
             <li key={game.id} className="flex items-center justify-between gap-2 text-xs">
-              <span className="truncate text-slate-500 dark:text-slate-400">
+              <span className="truncate text-ink-500 dark:text-ink-400">
                 G{g + 1} {game.home || 'Home'} v {game.away || 'Away'}
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
                 <OutcomePill outcome={picks[g]} label={`${OUTCOME_SYMBOL[picks[g]]} ${pickLabel(game, picks[g])}`} />
-                <span className="w-11 text-right tabular-nums text-slate-500">{(gen.probs[g][picks[g]] * 100).toFixed(1)}%</span>
+                <span className="w-11 text-right tabular-nums text-ink-500">{(gen.probs[g][picks[g]] * 100).toFixed(1)}%</span>
               </span>
             </li>
           ))}
@@ -60,15 +60,15 @@ export function ProbabilityPanel({ gen, picks }: Props) {
       </section>
 
       <section>
-        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">
           Exactly K correct picks
         </h3>
-        <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+        <p className="mb-2 text-xs text-ink-500 dark:text-ink-400">
           For the selected slip: how many of the {gen.total.toLocaleString()} possible results give exactly K hits, and how likely that is.
         </p>
         <table className="w-full text-xs">
           <thead>
-            <tr className="text-left text-slate-500 dark:text-slate-400">
+            <tr className="text-left text-ink-500 dark:text-ink-400">
               <th className="py-1 font-medium">K</th>
               <th className="py-1 text-right font-medium">Results</th>
               <th className="py-1 pl-3 font-medium">Chance</th>
@@ -76,17 +76,17 @@ export function ProbabilityPanel({ gen, picks }: Props) {
           </thead>
           <tbody>
             {[...dist].reverse().map((d) => (
-              <tr key={d.k} className="border-t border-slate-100 dark:border-slate-800">
+              <tr key={d.k} className="border-t border-ink-100 dark:border-ink-800">
                 <td className="py-1 font-semibold tabular-nums">
                   {d.k}/{n}
-                  {d.k === n && <span className="ml-1 text-[10px] font-normal text-green-600 dark:text-green-400">win</span>}
+                  {d.k === n && <span className="ml-1 text-[10px] font-normal text-gold-600 dark:text-gold-400">win</span>}
                 </td>
                 <td className="py-1 text-right tabular-nums">{d.count.toLocaleString()}</td>
                 <td className="py-1 pl-3">
                   <div className="flex items-center gap-2">
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
                       <div
-                        className={`h-full rounded-full ${d.k === n ? 'bg-green-500' : 'bg-indigo-500'}`}
+                        className={`h-full rounded-full ${d.k === n ? 'bg-gold-400' : 'bg-brand-700 dark:bg-brand-400'}`}
                         style={{ width: `${maxProb ? (d.prob / maxProb) * 100 : 0}%` }}
                       />
                     </div>
@@ -104,10 +104,10 @@ export function ProbabilityPanel({ gen, picks }: Props) {
 
 function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 p-2.5 dark:border-slate-800">
-      <div className="text-[11px] text-slate-500 dark:text-slate-400">{label}</div>
+    <div className="rounded-lg border border-ink-200 p-2.5 dark:border-ink-800">
+      <div className="text-[11px] text-ink-500 dark:text-ink-400">{label}</div>
       <div className="font-semibold tabular-nums">{value}</div>
-      {hint && <div className="truncate text-[10px] text-slate-400" title={hint}>{hint}</div>}
+      {hint && <div className="truncate text-[10px] text-ink-400" title={hint}>{hint}</div>}
     </div>
   );
 }

@@ -212,12 +212,12 @@ export default function App() {
   return (
     <div className="flex h-dvh flex-col">
       {/* Top bar */}
-      <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-3 py-2 sm:px-4 sm:py-2.5 dark:border-slate-800 dark:bg-slate-900">
+      <header className="flex items-center gap-3 border-b border-brand-900 bg-brand-800 px-3 py-2 text-white sm:px-4 sm:py-2.5 dark:border-ink-800 dark:bg-brand-950">
         <div className="flex min-w-0 items-center gap-2.5">
           <img src="./favicon.svg" alt="" className="size-8 shrink-0" />
           <div className="min-w-0 leading-tight">
             <h1 className="text-lg font-bold tracking-tight">Dflow</h1>
-            <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">Betting slip outcome explorer</p>
+            <p className="truncate text-[11px] text-brand-200">Betting slip outcome explorer</p>
           </div>
         </div>
 
@@ -226,7 +226,7 @@ export default function App() {
           <Stat label="Games" value={games.length} />
           <Stat label="Total combinations" value={comboLabel} tone={comboTone} />
           {games.length > 0 && (
-            <span className="hidden text-xs text-slate-400 xl:inline" title="Product of active outcomes per game">
+            <span className="hidden text-xs text-brand-300 xl:inline" title="Product of active outcomes per game">
               = {games.map((g) => g.active.filter(Boolean).length).join(' × ')}
             </span>
           )}
@@ -237,26 +237,26 @@ export default function App() {
           <span
             className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums lg:hidden ${
               comboTone === 'error'
-                ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
+                ? 'bg-flame-500 text-white'
                 : comboTone === 'warn'
-                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                  : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                  ? 'bg-gold-400 text-brand-950'
+                  : 'bg-white/10 text-white ring-1 ring-white/15'
             }`}
             title="Total combinations"
           >
             {comboLabel} slips
           </span>
           {stale && (
-            <span className="hidden rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 lg:inline dark:bg-amber-950 dark:text-amber-300">
+            <span className="hidden rounded-full bg-gold-400/15 px-2 py-0.5 text-xs font-medium text-gold-300 ring-1 ring-gold-400/30 lg:inline">
               Inputs changed
             </span>
           )}
           <span className="hidden lg:contents">
-            <Button variant="primary" onClick={onGenerate} disabled={busy}>
+            <Button variant="cta" onClick={onGenerate} disabled={busy}>
               <Icon d={ICONS.play} className="size-3.5" /> {busy ? 'Generating…' : 'Generate'}
             </Button>
           </span>
-          <Button variant="ghost" className="!px-2.5" onClick={() => setDark((d) => !d)} aria-label="Toggle dark mode" title="Toggle dark mode">
+          <Button variant="ghost" className="!px-2.5 !text-brand-100 hover:!bg-white/10" onClick={() => setDark((d) => !d)} aria-label="Toggle dark mode" title="Toggle dark mode">
             <Icon d={dark ? ICONS.sun : ICONS.moon} />
           </Button>
         </div>
@@ -265,7 +265,7 @@ export default function App() {
       {total > WARN_THRESHOLD && (
         <div
           className={`flex items-start gap-2 px-4 py-1.5 text-xs ${
-            tooMany ? 'bg-red-50 text-red-800 dark:bg-red-950/60 dark:text-red-200' : 'bg-amber-50 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'
+            tooMany ? 'bg-flame-50 text-flame-800 dark:bg-flame-950/60 dark:text-flame-200' : 'bg-gold-50 text-gold-900 dark:bg-gold-950/50 dark:text-gold-200'
           }`}
         >
           <Icon d={ICONS.alert} className="mt-px size-3.5 shrink-0" />
@@ -277,13 +277,13 @@ export default function App() {
 
       <div className="flex min-h-0 flex-1">
         {/* Sidebar (desktop) */}
-        <aside className="hidden w-[340px] shrink-0 border-r border-slate-200 bg-slate-50 lg:block dark:border-slate-800 dark:bg-slate-900/50">
+        <aside className="hidden w-[340px] shrink-0 border-r border-ink-200 bg-ink-50 lg:block dark:border-ink-800 dark:bg-ink-900/50">
           {sidebar}
         </aside>
 
         {/* Main */}
         <main className="flex min-w-0 flex-1 flex-col">
-          <div className="hidden items-center gap-1 border-b border-slate-200 bg-white px-3 lg:flex dark:border-slate-800 dark:bg-slate-900" role="tablist">
+          <div className="hidden items-center gap-1 border-b border-ink-200 bg-white px-3 lg:flex dark:border-ink-800 dark:bg-ink-900" role="tablist">
             {desktopTabs.map((t) => (
               <button
                 key={t.id}
@@ -293,8 +293,8 @@ export default function App() {
                 onClick={() => setTab(t.id)}
                 className={`-mb-px border-b-2 px-3 py-2.5 text-sm font-medium ${t.className ?? ''} ${
                   view === t.id
-                    ? 'border-indigo-600 text-indigo-700 dark:border-indigo-400 dark:text-indigo-300'
-                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                    ? 'border-brand-800 text-brand-800 dark:border-brand-400 dark:text-brand-300'
+                    : 'border-transparent text-ink-500 hover:text-ink-800 dark:text-ink-400 dark:hover:text-ink-200'
                 }`}
               >
                 {t.label}
@@ -304,15 +304,15 @@ export default function App() {
 
           {hasSlip && view !== 'games' && <SlipBar gen={gen} picks={picks} row={selectedRow} onRandom={randomSlip} />}
 
-          <div className={`min-h-0 flex-1 ${view === 'games' ? 'bg-slate-50 dark:bg-slate-950' : 'bg-white dark:bg-slate-950'}`}>{content}</div>
+          <div className={`min-h-0 flex-1 ${view === 'games' ? 'bg-ink-50 dark:bg-ink-950' : 'bg-white dark:bg-ink-950'}`}>{content}</div>
         </main>
 
         {/* Probability rail (wide screens) */}
         {hasSlip && (
-          <aside className="hidden w-[340px] shrink-0 overflow-y-auto border-l border-slate-200 bg-slate-50 xl:block dark:border-slate-800 dark:bg-slate-900/50">
-            <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+          <aside className="hidden w-[340px] shrink-0 overflow-y-auto border-l border-ink-200 bg-ink-50 xl:block dark:border-ink-800 dark:bg-ink-900/50">
+            <div className="border-b border-ink-200 px-4 py-3 dark:border-ink-800">
               <h2 className="text-sm font-semibold">Probability</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Equal odds unless you set custom weights</p>
+              <p className="text-xs text-ink-500 dark:text-ink-400">Equal odds unless you set custom weights</p>
             </div>
             <ProbabilityPanel gen={gen} picks={picks} />
           </aside>
@@ -321,8 +321,8 @@ export default function App() {
 
       {/* Mobile: generate bar + bottom navigation */}
       {showMobileGenerate && (
-        <div className="border-t border-slate-200 bg-white px-3 py-2 lg:hidden dark:border-slate-800 dark:bg-slate-900">
-          <Button variant="primary" className="!h-11 w-full !text-base" onClick={onGenerate} disabled={busy || games.length === 0 || tooMany}>
+        <div className="border-t border-ink-200 bg-white px-3 py-2 lg:hidden dark:border-ink-800 dark:bg-ink-900">
+          <Button variant="cta" className="!h-11 w-full !text-base" onClick={onGenerate} disabled={busy || games.length === 0 || tooMany}>
             <Icon d={ICONS.play} className="size-4" />
             {busy
               ? 'Generating…'
@@ -335,7 +335,7 @@ export default function App() {
         </div>
       )}
       <nav
-        className="grid grid-cols-4 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden dark:border-slate-800 dark:bg-slate-900"
+        className="grid grid-cols-4 border-t border-ink-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden dark:border-ink-800 dark:bg-ink-900"
         role="tablist"
         aria-label="Sections"
       >
@@ -349,16 +349,16 @@ export default function App() {
               aria-selected={active}
               onClick={() => setTab(t.id)}
               className={`relative flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${
-                active ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400'
+                active ? 'text-brand-800 dark:text-brand-300' : 'text-ink-500 dark:text-ink-400'
               }`}
             >
-              {active && <span className="absolute inset-x-6 top-0 h-0.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />}
+              {active && <span className="absolute inset-x-6 top-0 h-0.5 rounded-full bg-brand-800 dark:bg-brand-400" />}
               <span className="relative">
                 <Icon d={t.icon} className="size-5" />
                 {t.badge && (
                   <span
                     className={`absolute -right-3 -top-1.5 min-w-4 rounded-full px-1 text-center text-[10px] leading-4 font-bold ${
-                      t.badge === '•' ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                      t.badge === '•' ? 'bg-gold-400 text-brand-950' : 'bg-ink-200 text-ink-700 dark:bg-ink-700 dark:text-ink-200'
                     }`}
                   >
                     {t.badge === '•' ? '!' : t.badge}
@@ -373,15 +373,15 @@ export default function App() {
 
       {/* Confirm large generation */}
       {confirmLarge && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="warn-title">
-          <div className="w-full max-w-md rounded-t-2xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl sm:rounded-2xl sm:pb-5 dark:bg-slate-900">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-950/50 p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="warn-title">
+          <div className="w-full max-w-md rounded-t-2xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl sm:rounded-2xl sm:pb-5 dark:bg-ink-900">
             <div className="flex items-start gap-3">
-              <div className="rounded-full bg-amber-100 p-2 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+              <div className="rounded-full bg-gold-100 p-2 text-gold-700 dark:bg-gold-950 dark:text-gold-300">
                 <Icon d={ICONS.alert} className="size-5" />
               </div>
               <div>
                 <h2 id="warn-title" className="font-semibold">Generate {formatBig(total)} combinations?</h2>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
                   That's more than {WARN_THRESHOLD.toLocaleString()}. It will work, but the table may be slow to sort and filter, and the graph will use the compact layered view.
                   Consider removing a game or unticking outcomes you're confident about.
                 </p>
@@ -391,7 +391,7 @@ export default function App() {
               <Button className="!h-11 sm:!h-9" onClick={() => setConfirmLarge(false)}>
                 Cancel
               </Button>
-              <Button variant="primary" className="!h-11 sm:!h-9" onClick={() => runGenerate(games, afterGenerate)}>
+              <Button variant="cta" className="!h-11 sm:!h-9" onClick={() => runGenerate(games, afterGenerate)}>
                 Generate anyway
               </Button>
             </div>
@@ -400,12 +400,12 @@ export default function App() {
       )}
 
       {/* Toasts: under the header on phones, bottom-centre on desktop */}
-      <div className="pointer-events-none fixed inset-x-3 top-16 z-50 flex flex-col items-center gap-2 lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:top-auto lg:-translate-x-1/2" aria-live="polite">
+      <div className="pointer-events-none fixed inset-x-3 top-16 z-50 flex flex-col items-center gap-2 lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:top-auto lg:-tranink-x-1/2" aria-live="polite">
         {toasts.map((t) => (
           <div
             key={t.id}
             className={`animate-toast pointer-events-auto flex max-w-full items-center gap-2 rounded-lg px-3.5 py-2 text-sm shadow-lg ${
-              t.kind === 'error' ? 'bg-red-600 text-white' : 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+              t.kind === 'error' ? 'bg-flame-600 text-white' : 'bg-ink-900 text-white dark:bg-ink-100 dark:text-ink-900'
             }`}
           >
             {t.kind === 'loading' && <span className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" />}
@@ -420,10 +420,10 @@ export default function App() {
 function SlipBar({ gen, picks, row, onRandom }: { gen: Generated; picks: Outcome[]; row: number; onRandom: () => void }) {
   const shown = picks.slice(0, 12);
   return (
-    <div className="flex items-center gap-2 border-b border-slate-200 bg-indigo-50/60 px-3 py-1.5 text-xs dark:border-slate-800 dark:bg-indigo-950/30">
+    <div className="flex items-center gap-2 border-b border-ink-200 bg-brand-50/60 px-3 py-1.5 text-xs dark:border-ink-800 dark:bg-brand-950/30">
       <div className="flex shrink-0 flex-col leading-tight lg:flex-row lg:items-center lg:gap-2">
-        <span className="font-semibold text-indigo-800 dark:text-indigo-200">Slip #{(row + 1).toLocaleString()}</span>
-        <span className="tabular-nums text-slate-500 lg:hidden dark:text-slate-400">{formatPct(gen.rowProb[row] ?? 0)}</span>
+        <span className="font-semibold text-brand-800 dark:text-brand-200">Slip #{(row + 1).toLocaleString()}</span>
+        <span className="tabular-nums text-ink-500 lg:hidden dark:text-ink-400">{formatPct(gen.rowProb[row] ?? 0)}</span>
       </div>
       {/* Phones: compact coloured chips. Desktop: full pick names. */}
       <SlipChips picks={picks} className="min-w-0 flex-1 lg:hidden" />
@@ -431,9 +431,9 @@ function SlipBar({ gen, picks, row, onRandom }: { gen: Generated; picks: Outcome
         {shown.map((o, g) => (
           <OutcomePill key={g} outcome={o} className="shrink-0" label={`${OUTCOME_SYMBOL[o]} ${pickLabel(gen.games[g], o)}`} />
         ))}
-        {picks.length > shown.length && <span className="shrink-0 text-slate-500">+{picks.length - shown.length} more</span>}
+        {picks.length > shown.length && <span className="shrink-0 text-ink-500">+{picks.length - shown.length} more</span>}
       </div>
-      <span className="hidden shrink-0 tabular-nums text-slate-600 lg:inline dark:text-slate-300">P = {formatPct(gen.rowProb[row] ?? 0)}</span>
+      <span className="hidden shrink-0 tabular-nums text-ink-600 lg:inline dark:text-ink-300">P = {formatPct(gen.rowProb[row] ?? 0)}</span>
       <Button size="sm" variant="ghost" className="!h-9 lg:!h-8" onClick={onRandom} title="Pick a random slip" aria-label="Pick a random slip">
         <Icon d={ICONS.shuffle} className="size-4 lg:size-3.5" />
         <span className="hidden sm:inline">Random</span>
@@ -447,19 +447,19 @@ function EmptyState({ hasGames, onAdd, onSample, onGenerate }: { hasGames: boole
     <div className="flex h-full items-center justify-center p-8">
       <div className="max-w-sm text-center">
         <div className="mx-auto mb-4 flex w-fit gap-2">
-          <span className="size-3 rounded-full bg-green-500" />
-          <span className="size-3 rounded-full bg-amber-500" />
-          <span className="size-3 rounded-full bg-blue-500" />
+          <span className="size-3 rounded-full bg-brand-400" />
+          <span className="size-3 rounded-full bg-gold-400" />
+          <span className="size-3 rounded-full bg-flame-500" />
         </div>
         <h2 className="text-lg font-semibold">{hasGames ? 'Ready when you are' : 'No games yet'}</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           {hasGames
             ? 'Press Generate to build every combination of your games.'
             : 'Add games, or load the five sample fixtures to see the 243-combination graph.'}
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           {hasGames ? (
-            <Button variant="primary" onClick={onGenerate}>Generate</Button>
+            <Button variant="cta" onClick={onGenerate}>Generate</Button>
           ) : (
             <>
               <Button variant="primary" onClick={onSample}>Load sample games</Button>

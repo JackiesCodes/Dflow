@@ -64,7 +64,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
         accessorFn: (r) => r + 1,
         size: 80,
         enableColumnFilter: false,
-        cell: (c) => <span className="tabular-nums text-slate-500 dark:text-slate-400">{c.getValue<number>().toLocaleString()}</span>,
+        cell: (c) => <span className="tabular-nums text-ink-500 dark:text-ink-400">{c.getValue<number>().toLocaleString()}</span>,
       },
     ];
     for (let g = 0; g < n; g++) {
@@ -181,16 +181,16 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
   };
 
   const toolbar = (
-    <div className="border-b border-slate-200 px-3 py-2 dark:border-slate-800">
+    <div className="border-b border-ink-200 px-3 py-2 dark:border-ink-800">
       <div className="flex flex-wrap items-center gap-2">
         <label className="relative min-w-0 flex-1 basis-48">
-          <Icon d={ICONS.search} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Icon d={ICONS.search} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -tranink-y-1/2 text-ink-400" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={compact ? 'Search team, 1-X-2, #57…' : 'Search: team, “1-X-2”, “draw”, #57…'}
-            className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-8 pr-2 text-base focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:h-8 sm:text-sm dark:border-slate-700 dark:bg-slate-950"
+            className="h-10 w-full rounded-lg border border-ink-300 bg-white pl-8 pr-2 text-base focus:border-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-700/30 sm:h-8 sm:text-sm dark:border-ink-700 dark:bg-ink-950"
           />
         </label>
         {compact ? (
@@ -210,7 +210,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
           </>
         ) : (
           <>
-            <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+            <span className="text-xs tabular-nums text-ink-500 dark:text-ink-400">
               {rows.length.toLocaleString()} of {gen.total.toLocaleString()} rows
             </span>
             {filtersActive && (
@@ -228,30 +228,30 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
         )}
       </div>
       {compact && (
-        <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <div className="mt-1.5 flex items-center justify-between text-xs text-ink-500 dark:text-ink-400">
           <span className="tabular-nums">
             {rows.length.toLocaleString()} of {gen.total.toLocaleString()} slips
           </span>
           <div className="flex gap-3">
             {filtersActive && (
-              <button type="button" className="font-medium text-indigo-600 dark:text-indigo-300" onClick={clearFilters}>
+              <button type="button" className="font-medium text-brand-800 dark:text-brand-300" onClick={clearFilters}>
                 Clear
               </button>
             )}
-            <button type="button" className="font-medium text-indigo-600 dark:text-indigo-300" onClick={scrollToSelected}>
+            <button type="button" className="font-medium text-brand-800 dark:text-brand-300" onClick={scrollToSelected}>
               Go to selected
             </button>
           </div>
         </div>
       )}
       {compact && showFilters && (
-        <div className="mt-2 max-h-[45vh] space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-300">
+        <div className="mt-2 max-h-[45vh] space-y-3 overflow-y-auto rounded-xl border border-ink-200 bg-ink-50 p-3 dark:border-ink-800 dark:bg-ink-900">
+          <label className="block text-xs font-medium text-ink-600 dark:text-ink-300">
             Sort by
             <select
               value={sortId}
               onChange={(e) => setSorting(SORT_OPTIONS.find((o) => o.id === e.target.value)?.sorting ?? [])}
-              className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-2 text-base dark:border-slate-700 dark:bg-slate-950"
+              className="mt-1 h-10 w-full rounded-lg border border-ink-300 bg-white px-2 text-base dark:border-ink-700 dark:bg-ink-950"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -267,7 +267,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
             const opts: (Outcome | undefined)[] = [undefined, ...gen.activeByGame[g]];
             return (
               <div key={game.id}>
-                <div className="mb-1 truncate text-xs font-medium text-slate-600 dark:text-slate-300">
+                <div className="mb-1 truncate text-xs font-medium text-ink-600 dark:text-ink-300">
                   G{g + 1} · {game.home || 'Home'} v {game.away || 'Away'}
                 </div>
                 <div className="flex gap-1">
@@ -282,9 +282,9 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
                         className={`h-9 flex-1 rounded-lg border text-sm font-semibold ${
                           on
                             ? o === undefined
-                              ? 'border-slate-800 bg-slate-800 text-white dark:border-slate-200 dark:bg-slate-200 dark:text-slate-900'
+                              ? 'border-ink-800 bg-ink-800 text-white dark:border-ink-200 dark:bg-ink-200 dark:text-ink-900'
                               : OUTCOME_STYLES[o].solid
-                            : 'border-slate-300 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300'
+                            : 'border-ink-300 bg-white text-ink-600 dark:border-ink-700 dark:bg-ink-950 dark:text-ink-300'
                         }`}
                       >
                         {o === undefined ? 'All' : OUTCOME_SYMBOL[o]}
@@ -325,22 +325,22 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
                     aria-pressed={selected}
                     className={`flex h-full w-full items-center gap-3 rounded-xl border px-3 text-left ${
                       selected
-                        ? 'border-indigo-400 bg-indigo-50 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:bg-indigo-950/60'
-                        : 'border-slate-200 bg-white active:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:active:bg-slate-800'
+                        ? 'border-brand-400 bg-brand-50 ring-2 ring-brand-700/30 dark:border-brand-700 dark:bg-brand-950/60'
+                        : 'border-ink-200 bg-white active:bg-ink-100 dark:border-ink-800 dark:bg-ink-900 dark:active:bg-ink-800'
                     }`}
                   >
-                    <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400">
+                    <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-ink-500 dark:text-ink-400">
                       #{(r + 1).toLocaleString()}
                     </span>
                     <SlipChips picks={gen.codes.subarray(r * n, r * n + n)} className="min-w-0 flex-1" />
-                    <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">{formatPct(gen.rowProb[r])}</span>
+                    <span className="shrink-0 text-xs tabular-nums text-ink-500 dark:text-ink-400">{formatPct(gen.rowProb[r])}</span>
                   </button>
                 </li>
               );
             })}
           </ul>
           {rows.length === 0 && (
-            <div className="p-10 text-center text-sm text-slate-500 dark:text-slate-400">No slips match these filters.</div>
+            <div className="p-10 text-center text-sm text-ink-500 dark:text-ink-400">No slips match these filters.</div>
           )}
         </div>
       </div>
@@ -352,7 +352,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
       {toolbar}
       <div ref={parentRef} className="relative min-h-0 flex-1 overflow-auto">
         <table className="grid text-sm" style={{ width: totalWidth, minWidth: '100%' }}>
-          <thead className="sticky top-0 z-10 grid bg-slate-100 dark:bg-slate-900">
+          <thead className="sticky top-0 z-10 grid bg-ink-100 dark:bg-ink-900">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id} className="flex w-full">
                 {hg.headers.map((h) => {
@@ -361,24 +361,24 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
                   return (
                     <th
                       key={h.id}
-                      className="flex flex-col gap-1 border-b border-r border-slate-200 px-2 py-1.5 text-left text-xs font-semibold text-slate-600 last:border-r-0 dark:border-slate-800 dark:text-slate-300"
+                      className="flex flex-col gap-1 border-b border-r border-ink-200 px-2 py-1.5 text-left text-xs font-semibold text-ink-600 last:border-r-0 dark:border-ink-800 dark:text-ink-300"
                       style={{ width: h.getSize(), flex: h.column.id === 'slip' ? '1 0 auto' : undefined }}
                     >
                       <button
                         type="button"
                         onClick={h.column.getToggleSortingHandler()}
-                        className="flex items-center gap-1 truncate text-left hover:text-slate-900 dark:hover:text-white"
+                        className="flex items-center gap-1 truncate text-left hover:text-ink-900 dark:hover:text-white"
                         title={`Sort by ${String(h.column.columnDef.header)}`}
                       >
                         <span className="truncate">{flexRender(h.column.columnDef.header, h.getContext())}</span>
-                        <span className="text-indigo-500">{sorted === 'asc' ? '▲' : sorted === 'desc' ? '▼' : ''}</span>
+                        <span className="text-brand-700 dark:text-brand-400">{sorted === 'asc' ? '▲' : sorted === 'desc' ? '▼' : ''}</span>
                       </button>
                       {game !== undefined && (
                         <select
                           aria-label={`Filter game ${game + 1}`}
                           value={(h.column.getFilterValue() as number | undefined) ?? ''}
                           onChange={(e) => h.column.setFilterValue(e.target.value === '' ? undefined : Number(e.target.value))}
-                          className="h-6 rounded border border-slate-300 bg-white px-1 text-[11px] font-normal dark:border-slate-700 dark:bg-slate-950"
+                          className="h-6 rounded border border-ink-300 bg-white px-1 text-[11px] font-normal dark:border-ink-700 dark:bg-ink-950"
                         >
                           <option value="">All</option>
                           {gen.activeByGame[game].map((o) => (
@@ -402,12 +402,12 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
                 <tr
                   key={row.id}
                   onClick={() => onSelectRow(row.original)}
-                  className={`absolute flex w-full cursor-pointer border-b border-slate-100 dark:border-slate-800/70 ${
+                  className={`absolute flex w-full cursor-pointer border-b border-ink-100 dark:border-ink-800/70 ${
                     selected
-                      ? 'bg-indigo-100 dark:bg-indigo-950'
+                      ? 'bg-brand-100 dark:bg-brand-950'
                       : vi.index % 2
-                        ? 'bg-white hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900'
-                        : 'bg-slate-50/60 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-900'
+                        ? 'bg-white hover:bg-ink-100 dark:bg-ink-950 dark:hover:bg-ink-900'
+                        : 'bg-ink-50/60 hover:bg-ink-100 dark:bg-ink-900/40 dark:hover:bg-ink-900'
                   }`}
                   style={{ transform: `translateY(${vi.start}px)`, height: ROW_H }}
                   aria-selected={selected}
@@ -427,7 +427,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
           </tbody>
         </table>
         {rows.length === 0 && (
-          <div className="p-10 text-center text-sm text-slate-500 dark:text-slate-400">No combinations match these filters.</div>
+          <div className="p-10 text-center text-sm text-ink-500 dark:text-ink-400">No combinations match these filters.</div>
         )}
       </div>
     </div>

@@ -46,7 +46,7 @@ type StartData = { kind: 'start'; title: string; vertical?: boolean };
 
 const inPos = (v?: boolean) => (v ? Position.Top : Position.Left);
 const outPos = (v?: boolean) => (v ? Position.Bottom : Position.Right);
-const HANDLE = '!size-1.5 !min-w-0 !border-0 !bg-slate-400';
+const HANDLE = '!size-1.5 !min-w-0 !border-0 !bg-ink-400';
 type FlowNode =
   | Node<OutcomeData, 'outcome'>
   | Node<CollapsedData, 'collapsed'>
@@ -58,7 +58,7 @@ const OutcomeNode = memo(({ data }: NodeProps<Node<OutcomeData, 'outcome'>>) => 
   return (
     <div
       className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 shadow-sm transition-all ${
-        data.onPath ? `${s.solid} ring-4 ${s.ring}/30` : s.soft
+        data.onPath ? `${s.solid} ring-4 ${s.ring}` : s.soft
       } ${
         data.vertical
           ? 'h-[56px] w-[112px] gap-1.5 px-2 text-[11px]'
@@ -72,7 +72,7 @@ const OutcomeNode = memo(({ data }: NodeProps<Node<OutcomeData, 'outcome'>>) => 
       <span
         className={`flex shrink-0 items-center justify-center rounded font-bold ${
           data.compact ? 'size-4 text-[10px]' : 'size-6 text-xs'
-        } ${data.onPath ? 'bg-white/25' : `${s.dot} text-white`}`}
+        } ${data.onPath ? 'bg-white/30' : `${s.dot} ${s.dotText}`}`}
       >
         {OUTCOME_SYMBOL[data.outcome]}
       </span>
@@ -89,8 +89,8 @@ const CollapsedNode = memo(({ data }: NodeProps<Node<CollapsedData, 'collapsed'>
   <div
     className={`flex h-[52px] ${data.vertical ? 'w-[112px]' : 'w-[120px]'} flex-col items-center justify-center rounded-lg border-2 border-dashed text-xs ${
       data.onPath
-        ? 'border-indigo-500 bg-indigo-50 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200'
-        : 'border-slate-300 bg-white text-slate-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300'
+        ? 'border-brand-500 bg-brand-50 text-brand-800 dark:border-brand-400 dark:bg-brand-950/60 dark:text-brand-200'
+        : 'border-ink-300 bg-white text-ink-600 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-300'
     }`}
     title="Collapsed column — click the header to expand"
   >
@@ -107,31 +107,31 @@ const HeaderNode = memo(({ data }: NodeProps<Node<HeaderData, 'header'>>) =>
       className={`flex w-[360px] items-center gap-2 rounded-lg px-1 py-1 text-xs ${data.canCollapse ? 'cursor-pointer' : ''}`}
       title={data.canCollapse ? (data.collapsed ? 'Expand game' : 'Collapse game') : undefined}
     >
-      <span className="shrink-0 rounded-md bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-slate-200 dark:text-slate-900">
+      <span className="shrink-0 rounded-md bg-ink-800 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-ink-200 dark:text-ink-900">
         {data.title.replace('Game ', 'G')}
       </span>
-      <span className="min-w-0 flex-1 truncate font-semibold text-slate-700 dark:text-slate-200">{data.subtitle}</span>
-      {data.canCollapse && <span className="text-slate-400">{data.collapsed ? '▸' : '▾'}</span>}
+      <span className="min-w-0 flex-1 truncate font-semibold text-ink-700 dark:text-ink-200">{data.subtitle}</span>
+      {data.canCollapse && <span className="text-ink-400">{data.collapsed ? '▸' : '▾'}</span>}
     </div>
   ) : (
   <div
-    className={`w-[176px] rounded-lg border border-slate-200 bg-white/90 px-3 py-1.5 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-900/90 ${
-      data.canCollapse ? 'cursor-pointer hover:border-indigo-400' : ''
+    className={`w-[176px] rounded-lg border border-ink-200 bg-white/90 px-3 py-1.5 text-xs shadow-sm dark:border-ink-700 dark:bg-ink-900/90 ${
+      data.canCollapse ? 'cursor-pointer hover:border-brand-400' : ''
     } ${data.collapsed || data.narrow ? '!w-[120px]' : ''}`}
     title={data.canCollapse ? (data.collapsed ? 'Expand column' : 'Collapse column') : undefined}
   >
     <div className="flex items-center justify-between gap-1 font-semibold">
       <span className="truncate">{data.title}</span>
-      {data.canCollapse && <span className="text-slate-400">{data.collapsed ? '▸' : '▾'}</span>}
+      {data.canCollapse && <span className="text-ink-400">{data.collapsed ? '▸' : '▾'}</span>}
     </div>
-    {!data.collapsed && <div className="truncate text-slate-500 dark:text-slate-400">{data.subtitle}</div>}
+    {!data.collapsed && <div className="truncate text-ink-500 dark:text-ink-400">{data.subtitle}</div>}
   </div>
   ),
 );
 
 const StartNode = memo(({ data }: NodeProps<Node<StartData, 'start'>>) => (
   <div
-    className={`flex ${data.vertical ? 'h-[34px]' : 'h-[52px]'} w-[96px] items-center justify-center rounded-full border-2 border-slate-400 bg-slate-800 text-xs font-semibold text-white dark:border-slate-500 dark:bg-slate-200 dark:text-slate-900`}
+    className={`flex ${data.vertical ? 'h-[34px]' : 'h-[52px]'} w-[96px] items-center justify-center rounded-full border-2 border-ink-400 bg-ink-800 text-xs font-semibold text-white dark:border-ink-500 dark:bg-ink-200 dark:text-ink-900`}
   >
     {data.title}
     <Handle type="source" position={outPos(data.vertical)} className={HANDLE} />
@@ -195,13 +195,13 @@ export function GraphView({ gen, picks, onSelect, dark, vertical = false }: Prop
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-2 text-xs dark:border-slate-800">
-        <div className="inline-flex rounded-lg border border-slate-300 p-0.5 dark:border-slate-700" role="group" aria-label="Graph layout">
+      <div className="flex flex-wrap items-center gap-2 border-b border-ink-200 px-3 py-2 text-xs dark:border-ink-800">
+        <div className="inline-flex rounded-lg border border-ink-300 p-0.5 dark:border-ink-700" role="group" aria-label="Graph layout">
           <button
             type="button"
             disabled={!treeAllowed}
             onClick={() => setMode('tree')}
-            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'tree' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300'} disabled:opacity-40`}
+            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'tree' ? 'bg-brand-800 text-white dark:bg-brand-400 dark:text-brand-950' : 'text-ink-600 dark:text-ink-300'} disabled:opacity-40`}
             title={treeAllowed ? 'Every path drawn as its own branch' : `Tree view is limited to ${TREE_LIMIT} combinations`}
           >
             <span className="sm:hidden">Tree</span>
@@ -210,7 +210,7 @@ export function GraphView({ gen, picks, onSelect, dark, vertical = false }: Prop
           <button
             type="button"
             onClick={() => setMode('flow')}
-            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'flow' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300'}`}
+            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'flow' ? 'bg-brand-800 text-white dark:bg-brand-400 dark:text-brand-950' : 'text-ink-600 dark:text-ink-300'}`}
             title="Compact layered flow — scales to any number of games"
           >
             <span className="sm:hidden">Flow</span>
@@ -227,7 +227,7 @@ export function GraphView({ gen, picks, onSelect, dark, vertical = false }: Prop
             </Button>
           </>
         )}
-        <span className="ml-auto hidden text-slate-500 md:inline dark:text-slate-400">
+        <span className="ml-auto hidden text-ink-500 md:inline dark:text-ink-400">
           {effectiveMode === 'tree'
             ? `${gen.total.toLocaleString()} leaves = ${gen.total.toLocaleString()} slips · click a node to pick its path`
             : 'Each left→right path is one slip · click outcomes to build a path · click headers to collapse'}

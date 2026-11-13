@@ -1,39 +1,49 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import type { Outcome } from '../lib/types';
 
-export const OUTCOME_STYLES: Record<Outcome, { solid: string; soft: string; ring: string; dot: string; hex: string }> = {
+export const OUTCOME_STYLES: Record<
+  Outcome,
+  { solid: string; soft: string; ring: string; dot: string; dotText: string; hex: string }
+> = {
+  // 1 — Home: sky blue
   0: {
-    solid: 'bg-green-600 text-white border-green-600',
-    soft: 'bg-green-50 text-green-800 border-green-300 dark:bg-green-950/60 dark:text-green-200 dark:border-green-800',
-    ring: 'ring-green-500',
-    dot: 'bg-green-500',
-    hex: '#16a34a',
+    solid: 'bg-brand-400 text-brand-950 border-brand-400',
+    soft: 'bg-brand-50 text-brand-800 border-brand-300 dark:bg-brand-950/70 dark:text-brand-200 dark:border-brand-700',
+    ring: 'ring-brand-400/40',
+    dot: 'bg-brand-400',
+    dotText: 'text-brand-950',
+    hex: '#6caddf',
   },
+  // X — Draw: gold
   1: {
-    solid: 'bg-amber-500 text-slate-950 border-amber-500',
-    soft: 'bg-amber-50 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-800',
-    ring: 'ring-amber-500',
-    dot: 'bg-amber-500',
-    hex: '#f59e0b',
+    solid: 'bg-gold-400 text-brand-950 border-gold-400',
+    soft: 'bg-gold-50 text-gold-800 border-gold-300 dark:bg-gold-950/70 dark:text-gold-200 dark:border-gold-700',
+    ring: 'ring-gold-400/40',
+    dot: 'bg-gold-400',
+    dotText: 'text-brand-950',
+    hex: '#d4a11e',
   },
+  // 2 — Away: red
   2: {
-    solid: 'bg-blue-600 text-white border-blue-600',
-    soft: 'bg-blue-50 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-800',
-    ring: 'ring-blue-500',
-    dot: 'bg-blue-500',
-    hex: '#2563eb',
+    solid: 'bg-flame-500 text-white border-flame-500',
+    soft: 'bg-flame-50 text-flame-700 border-flame-200 dark:bg-flame-950/70 dark:text-flame-200 dark:border-flame-800',
+    ring: 'ring-flame-500/40',
+    dot: 'bg-flame-500',
+    dotText: 'text-white',
+    hex: '#ee3124',
   },
 };
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type Variant = 'primary' | 'cta' | 'secondary' | 'ghost' | 'danger';
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    'bg-indigo-600 text-white hover:bg-indigo-500 disabled:bg-indigo-600/40 shadow-sm',
+    'bg-brand-800 text-white hover:bg-brand-700 shadow-sm dark:bg-brand-400 dark:text-brand-950 dark:hover:bg-brand-300',
+  cta: 'bg-gold-400 font-semibold text-brand-900 hover:bg-gold-300 shadow-sm',
   secondary:
-    'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800',
-  ghost: 'text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800',
-  danger: 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/50',
+    'border border-ink-300 bg-white text-ink-700 hover:bg-ink-100 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:bg-ink-800',
+  ghost: 'text-ink-600 hover:bg-ink-200/70 dark:text-ink-300 dark:hover:bg-ink-800',
+  danger: 'text-flame-600 hover:bg-flame-50 dark:text-flame-400 dark:hover:bg-flame-950/50',
 };
 
 export function Button({
@@ -46,22 +56,18 @@ export function Button({
   return (
     <button
       type="button"
-      className={`inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 ${sz} ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-60 ${sz} ${VARIANTS[variant]} ${className}`}
       {...rest}
     />
   );
 }
 
 export function Stat({ label, value, tone }: { label: string; value: ReactNode; tone?: 'warn' | 'error' }) {
-  const color =
-    tone === 'error'
-      ? 'text-red-600 dark:text-red-400'
-      : tone === 'warn'
-        ? 'text-amber-600 dark:text-amber-400'
-        : 'text-slate-900 dark:text-white';
+  // Rendered on the navy header bar.
+  const color = tone === 'error' ? 'text-flame-300' : tone === 'warn' ? 'text-gold-400' : 'text-white';
   return (
     <div className="flex flex-col leading-tight">
-      <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+      <span className="text-[11px] font-medium uppercase tracking-wide text-brand-200">{label}</span>
       <span className={`font-semibold tabular-nums ${color}`}>{value}</span>
     </div>
   );

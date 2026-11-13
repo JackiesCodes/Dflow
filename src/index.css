@@ -6,9 +6,58 @@
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --color-home: #16a34a;
-  --color-draw: #d97706;
-  --color-away: #2563eb;
+
+  /* Brand blues: sky (400) → navy (800) */
+  --color-brand-50: #eef6fc;
+  --color-brand-100: #d9eaf8;
+  --color-brand-200: #b7d7f0;
+  --color-brand-300: #92c2e8;
+  --color-brand-400: #6caddf;
+  --color-brand-500: #3e88c6;
+  --color-brand-600: #1d64a3;
+  --color-brand-700: #0b4683;
+  --color-brand-800: #00285e;
+  --color-brand-900: #001d46;
+  --color-brand-950: #00122e;
+
+  /* Navy-tinted neutrals */
+  --color-ink-50: #f5f8fc;
+  --color-ink-100: #eaf0f7;
+  --color-ink-200: #d7e0ec;
+  --color-ink-300: #b5c3d6;
+  --color-ink-400: #8597b0;
+  --color-ink-500: #5e708b;
+  --color-ink-600: #45566f;
+  --color-ink-700: #2d3e59;
+  --color-ink-800: #1b2c48;
+  --color-ink-900: #0f1e38;
+  --color-ink-950: #081428;
+
+  /* Gold: light (400) and dark (500) */
+  --color-gold-50: #fff9eb;
+  --color-gold-100: #ffefc6;
+  --color-gold-200: #ffe29b;
+  --color-gold-300: #ffd476;
+  --color-gold-400: #ffc758;
+  --color-gold-500: #d4a11e;
+  --color-gold-600: #a97d12;
+  --color-gold-700: #7d5c0d;
+  --color-gold-800: #543e09;
+  --color-gold-900: #302306;
+  --color-gold-950: #1f1704;
+
+  /* Red */
+  --color-flame-50: #fef2f1;
+  --color-flame-100: #fde1de;
+  --color-flame-200: #fbbdb6;
+  --color-flame-300: #f78d81;
+  --color-flame-400: #f25b4b;
+  --color-flame-500: #ee3124;
+  --color-flame-600: #c92112;
+  --color-flame-700: #9d1a0e;
+  --color-flame-800: #6d140a;
+  --color-flame-900: #430c06;
+  --color-flame-950: #2b0804;
 }
 
 html,
@@ -18,26 +67,25 @@ body,
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+  @apply bg-ink-50 text-ink-900 antialiased dark:bg-ink-950 dark:text-ink-100;
 }
 
 /* React Flow theming */
 .react-flow {
   --xy-background-color: transparent;
-  --xy-edge-stroke: #cbd5e1;
+  --xy-edge-stroke: #b5c3d6;
   --xy-controls-button-background-color: #ffffff;
-  --xy-controls-button-border-color: #e2e8f0;
-  --xy-minimap-background-color: #f8fafc;
+  --xy-controls-button-border-color: #d7e0ec;
+  --xy-controls-button-color: #00285e;
+  --xy-background-pattern-color: #d7e0ec;
 }
 .dark .react-flow {
-  --xy-edge-stroke: #334155;
-  --xy-controls-button-background-color: #1e293b;
-  --xy-controls-button-background-color-hover: #334155;
-  --xy-controls-button-color: #e2e8f0;
-  --xy-controls-button-border-color: #334155;
-  --xy-minimap-background-color: #0f172a;
-  --xy-minimap-mask-background-color: rgb(2 6 23 / 0.6);
-  --xy-background-pattern-color: #1e293b;
+  --xy-edge-stroke: #2d3e59;
+  --xy-controls-button-background-color: #0f1e38;
+  --xy-controls-button-background-color-hover: #1b2c48;
+  --xy-controls-button-color: #d7e0ec;
+  --xy-controls-button-border-color: #2d3e59;
+  --xy-background-pattern-color: #1b2c48;
 }
 .react-flow__attribution {
   background: transparent;
@@ -50,4 +98,4 @@ body {
 .animate-toast { animation: toast-in 160ms ease-out; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: rgb(148 163 184 / 0.4); border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: rgb(133 151 176 / 0.4); border-radius: 8px; }
