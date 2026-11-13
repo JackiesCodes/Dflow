@@ -4,7 +4,16 @@ import { OUTCOMES, OUTCOME_SYMBOL } from './types';
 export const WARN_THRESHOLD = 100_000;
 export const HARD_LIMIT = 1_000_000;
 
+/** Both teams to score: outcome 0 = GG (yes), 2 = NG (no); 1 is unused. */
+export function isBtts(game: Game | undefined): boolean {
+  return game?.market === 'btts';
+}
+
 export function activeOutcomes(game: Game): Outcome[] {
+  if (isBtts(game)) {
+    const a = ([0, 2] as Outcome[]).filter((o) => game.active[o]);
+    return a.length ? a : [0, 2];
+  }
   // Trusted team won't lose: their win or the draw, never the loss.
   if (game.trusted === 0) return [0, 1];
   if (game.trusted === 2) return [1, 2];
@@ -111,13 +120,20 @@ export function rowIndexOf(gen: Generated, picks: Outcome[]): number {
   return idx;
 }
 
-export function slipString(picks: ArrayLike<number>): string {
+/** Short code for a pick: 1 / X / 2, or GG / NG for both-teams-to-score games. */
+export function outcomeSymbol(game: Game | undefined, o: Outcome): string {
+  if (isBtts(game)) return o === 0 ? 'GG' : 'NG';
+  return OUTCOME_SYMBOL[o];
+}
+
+export function slipString(picks: ArrayLike<number>, games?: Game[]): string {
   let s = '';
-  for (let i = 0; i < picks.length; i++) s += (i ? '-' : '') + OUTCOME_SYMBOL[picks[i] as Outcome];
+  for (let i = 0; i < picks.length; i++) s += (i ? '-' : '') + outcomeSymbol(games?.[i], picks[i] as Outcome);
   return s;
 }
 
 export function pickLabel(game: Game, o: Outcome): string {
+  if (isBtts(game)) return o === 0 ? 'Both score' : 'Not both score';
   if (o === 1) return 'Draw';
   const team = o === 0 ? game.home : game.away;
   return `${team || (o === 0 ? 'Home' : 'Away')} win`;

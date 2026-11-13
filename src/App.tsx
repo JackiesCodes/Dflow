@@ -10,13 +10,13 @@ import {
   formatOdds,
   formatPct,
   generate,
+  outcomeSymbol,
   pickLabel,
   rowIndexOf,
   rowPicks,
 } from './lib/combinatorics';
 import { loadGames, loadPref, makeGame, sampleGames, saveGames, savePref } from './lib/storage';
 import type { Game, Generated, Outcome } from './lib/types';
-import { OUTCOME_SYMBOL } from './lib/types';
 import { GameSidebar } from './components/GameSidebar';
 import { GraphView } from './components/GraphView';
 import { TableView } from './components/TableView';
@@ -42,7 +42,7 @@ function useMediaQuery(q: string) {
 }
 
 const gamesSignature = (games: Game[]) =>
-  JSON.stringify(games.map((g) => [g.home, g.away, g.active, g.trusted ?? null, g.odds ?? null]));
+  JSON.stringify(games.map((g) => [g.home, g.away, g.active, g.market ?? "1x2", g.trusted ?? null, g.odds ?? null]));
 
 const TAB_IDS: Tab[] = ['games', 'graph', 'table', 'prob'];
 
@@ -455,10 +455,10 @@ function SlipBar({
         </span>
       </div>
       {/* Phones: compact coloured chips. Desktop: full pick names. */}
-      <SlipChips picks={picks} className="min-w-0 flex-1 lg:hidden" />
+      <SlipChips picks={picks} games={gen.games} className="min-w-0 flex-1 lg:hidden" />
       <div className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto py-0.5 lg:flex">
         {shown.map((o, g) => (
-          <OutcomePill key={g} outcome={o} className="shrink-0" label={`${OUTCOME_SYMBOL[o]} ${pickLabel(gen.games[g], o)}`} />
+          <OutcomePill key={g} outcome={o} className="shrink-0" label={`${outcomeSymbol(gen.games[g], o)} ${pickLabel(gen.games[g], o)}`} />
         ))}
         {picks.length > shown.length && <span className="shrink-0 text-ink-500">+{picks.length - shown.length} more</span>}
       </div>

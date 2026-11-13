@@ -6,6 +6,7 @@ import {
   generate,
   moneySummary,
   normalisedProbs,
+  pickLabel,
   rowIndexOf,
   rowPicks,
   slipString,
@@ -130,5 +131,31 @@ describe('odds and betting balance', () => {
   it('formats dollars', () => {
     expect(formatMoney(3187)).toBe('$3,187.00');
     expect(formatMoney(-12.5)).toBe('−$12.50');
+  });
+});
+
+describe('both teams to score market', () => {
+  const btts = (g: Game): Game => ({ ...g, market: 'btts' });
+
+  it('gives a game two outcomes, GG and NG, mixed with 1X2 games', () => {
+    const games = sampleGames();
+    games[2] = btts(games[2]);
+    games[3] = btts(games[3]);
+    const gen = generate(games);
+    expect(gen.total).toBe(108); // 3 × 3 × 2 × 2 × 3
+    expect(gen.activeByGame[2]).toEqual([0, 2]);
+    expect(slipString(rowPicks(gen, 0), gen.games)).toBe('1-1-GG-GG-1');
+    expect(slipString(rowPicks(gen, gen.total - 1), gen.games)).toBe('2-2-NG-NG-2');
+    expect(pickLabel(gen.games[2], 0)).toBe('Both score');
+    expect(gen.probs[2]).toEqual([0.5, 0, 0.5]);
+  });
+
+  it('can drop GG or NG, ignores trust badges, and uses GG / NG odds', () => {
+    const g = btts({ ...makeGame('A', 'B'), active: [true, true, false], trusted: 0, odds: [1.5, null, 3] });
+    expect(countCombinations([g])).toBe(1); // only GG
+    const both: Game = { ...g, active: [true, true, true] };
+    expect(countCombinations([both])).toBe(2);
+    expect(normalisedProbs(both)).toEqual([2 / 3, 0, 1 / 3]);
+    expect(generate([both]).hasOdds).toBe(true);
   });
 });

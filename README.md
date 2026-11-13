@@ -8,7 +8,8 @@ Five sample fixtures are preloaded, so it opens on the 3⁵ = **243-combination*
 
 ## Features
 
-- **Any number of games.** Each game has a home team, an away team and outcomes 1 / X / 2. You can untick outcomes per game, and the count becomes the product of the active outcomes (e.g. 3 × 2 × 3).
+- **Any number of games.** Each game has a home team, an away team and outcomes 1 / X / 2.
+- **Two markets per game.** Each game is either **1X2** (match result: 1 / X / 2) or **Both score** (both teams to score: GG yes / NG no), and one slip can mix both. A Both score game adds 2 outcomes instead of 3, has GG / NG odds, and doesn't use trust badges. You can untick outcomes per game, and the count becomes the product of the active outcomes (e.g. 3 × 2 × 3).
 - **Trust badges.** Each game has three shields, one per team plus one between them for the draw. Only one can be on per game:
   - *Team shield*: that team won't lose. Every slip includes their win or the draw, never the loss, so the game goes from 3 outcomes to 2.
   - *Draw shield*: the game ends level. Every slip has the draw for that game.

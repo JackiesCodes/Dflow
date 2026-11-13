@@ -11,9 +11,8 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { formatMoney, formatOdds, formatPct, pickLabel, slipString } from '../lib/combinatorics';
+import { formatMoney, formatOdds, formatPct, outcomeSymbol, pickLabel, slipString } from '../lib/combinatorics';
 import type { Generated, Outcome } from '../lib/types';
-import { OUTCOME_SYMBOL } from '../lib/types';
 import { Button, Icon, ICONS, OUTCOME_STYLES, OutcomePill, SlipChips } from './ui';
 
 interface Props {
@@ -83,7 +82,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, com
         meta: { game: g },
         cell: (c) => {
           const o = c.getValue<number>() as Outcome;
-          return <OutcomePill outcome={o} label={`${OUTCOME_SYMBOL[o]} · ${pickLabel(game, o)}`} />;
+          return <OutcomePill outcome={o} label={`${outcomeSymbol(game, o)} · ${pickLabel(game, o)}`} />;
         },
       });
     }
@@ -91,7 +90,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, com
       {
         id: 'slip',
         header: 'Full slip',
-        accessorFn: (r) => slipString(gen.codes.subarray(r * n, r * n + n)),
+        accessorFn: (r) => slipString(gen.codes.subarray(r * n, r * n + n), gen.games),
         size: Math.max(120, n * 18 + 24),
         enableColumnFilter: false,
         cell: (c) => <span className="font-mono text-xs tracking-wider">{c.getValue<string>()}</span>,
@@ -141,7 +140,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, com
   const globalFilterFn: FilterFn<number> = (row, _columnId, value: string) => {
     const r = row.original;
     const terms = value.split(/\s+/).filter(Boolean);
-    const slip = slipString(gen.codes.subarray(r * n, r * n + n)).toLowerCase();
+    const slip = slipString(gen.codes.subarray(r * n, r * n + n), gen.games).toLowerCase();
     return terms.every((t) => {
       if (String(r + 1) === t.replace(/^#/, '')) return true;
       if (slip.includes(t)) return true;
@@ -193,9 +192,9 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, com
       const cells = [String(r + 1)];
       for (let g = 0; g < n; g++) {
         const o = code(r, g);
-        cells.push(esc(`${OUTCOME_SYMBOL[o]} (${pickLabel(gen.games[g], o)})`));
+        cells.push(esc(`${outcomeSymbol(gen.games[g], o)} (${pickLabel(gen.games[g], o)})`));
       }
-      cells.push(slipString(gen.codes.subarray(r * n, r * n + n)), gen.rowProb[r].toPrecision(6));
+      cells.push(slipString(gen.codes.subarray(r * n, r * n + n), gen.games), gen.rowProb[r].toPrecision(6));
       if (gen.hasOdds) cells.push(gen.rowOdds[r].toFixed(2), (gen.rowOdds[r] * stake).toFixed(2));
       chunks.push(cells.join(','));
     }
@@ -327,7 +326,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, com
                             : 'border-ink-300 bg-white text-ink-600 dark:border-ink-700 dark:bg-ink-950 dark:text-ink-300'
                         }`}
                       >
-                        {o === undefined ? 'All' : OUTCOME_SYMBOL[o]}
+                        {o === undefined ? 'All' : outcomeSymbol(game, o)}
                       </button>
                     );
                   })}
@@ -372,7 +371,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, com
                     <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-ink-500 dark:text-ink-400">
                       #{(r + 1).toLocaleString()}
                     </span>
-                    <SlipChips picks={gen.codes.subarray(r * n, r * n + n)} className="min-w-0 flex-1" />
+                    <SlipChips picks={gen.codes.subarray(r * n, r * n + n)} games={gen.games} className="min-w-0 flex-1" />
                     {gen.hasOdds ? (
                       <span className="shrink-0 text-right leading-tight tabular-nums">
                         <span className="block text-sm font-semibold text-brand-700 dark:text-brand-400">
@@ -432,7 +431,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, com
                           <option value="">All</option>
                           {gen.activeByGame[game].map((o) => (
                             <option key={o} value={o}>
-                              {OUTCOME_SYMBOL[o]} · {pickLabel(gen.games[game], o)}
+                              {outcomeSymbol(gen.games[game], o)} · {pickLabel(gen.games[game], o)}
                             </option>
                           ))}
                         </select>

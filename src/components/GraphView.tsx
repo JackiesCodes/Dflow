@@ -10,7 +10,7 @@ import {
   type Node,
   type NodeProps,
 } from '@xyflow/react';
-import { pickLabel, rowIndexOf } from '../lib/combinatorics';
+import { isBtts, outcomeSymbol, pickLabel, rowIndexOf } from '../lib/combinatorics';
 import type { Generated, Outcome } from '../lib/types';
 import { OUTCOME_SYMBOL } from '../lib/types';
 import { Button, OUTCOME_STYLES } from './ui';
@@ -32,6 +32,8 @@ type OutcomeData = {
   vertical?: boolean;
   /** Locked in by the trust badge. */
   trusted?: boolean;
+  /** Badge text: 1 / X / 2 or GG / NG. */
+  symbol?: string;
 };
 type CollapsedData = { kind: 'collapsed'; game: number; title: string; count: number; onPath: boolean; pick?: string; vertical?: boolean };
 type HeaderData = {
@@ -76,7 +78,7 @@ const OutcomeNode = memo(({ data }: NodeProps<Node<OutcomeData, 'outcome'>>) => 
           data.compact ? 'size-4 text-[10px]' : 'size-6 text-xs'
         } ${data.onPath ? 'bg-white/30' : `${s.dot} ${s.dotText}`}`}
       >
-        {OUTCOME_SYMBOL[data.outcome]}
+        {data.symbol ?? OUTCOME_SYMBOL[data.outcome]}
       </span>
       <span className="min-w-0 flex-1 leading-tight">
         <span className="block truncate font-semibold">{data.title}</span>
@@ -320,7 +322,7 @@ function buildFlow(gen: Generated, picks: Outcome[], collapsed: Set<number>, ver
         id,
         type: 'collapsed',
         position: { x, y: top + ROW_H },
-        data: { kind: 'collapsed', game: g, title: `G${g + 1}`, count: act.length, onPath: true, pick: OUTCOME_SYMBOL[picks[g]] },
+        data: { kind: 'collapsed', game: g, title: `G${g + 1}`, count: act.length, onPath: true, pick: outcomeSymbol(gen.games[g], picks[g]) },
       });
       current = [{ id, onPath: true }];
       x += 160;
@@ -338,9 +340,10 @@ function buildFlow(gen: Generated, picks: Outcome[], collapsed: Set<number>, ver
             kind: 'outcome',
             outcome: o,
             game: g,
-            trusted: gen.games[g].trusted === o,
+            trusted: !isBtts(gen.games[g]) && gen.games[g].trusted === o,
+            symbol: outcomeSymbol(gen.games[g], o),
             title: pickLabel(gen.games[g], o),
-            subtitle: `${OUTCOME_SYMBOL[o]} · ${(gen.probs[g][o] * 100).toFixed(1)}%`,
+            subtitle: `${outcomeSymbol(gen.games[g], o)} · ${(gen.probs[g][o] * 100).toFixed(1)}%`,
             onPath,
               compact: false,
           },
@@ -410,7 +413,7 @@ function buildVerticalFlow(gen: Generated, picks: Outcome[], collapsed: Set<numb
         id,
         type: 'collapsed',
         position: { x: WIDTH / 2 - 56, y: rowY + 34 },
-        data: { kind: 'collapsed', game: g, title: `G${g + 1}`, count: act.length, onPath: true, pick: OUTCOME_SYMBOL[picks[g]], vertical: true },
+        data: { kind: 'collapsed', game: g, title: `G${g + 1}`, count: act.length, onPath: true, pick: outcomeSymbol(gen.games[g], picks[g]), vertical: true },
       });
       current = [{ id, onPath: true }];
     } else {
@@ -426,8 +429,9 @@ function buildVerticalFlow(gen: Generated, picks: Outcome[], collapsed: Set<numb
             kind: 'outcome',
             outcome: o,
             game: g,
-            trusted: gen.games[g].trusted === o,
-            title: o === 1 ? 'Draw' : (o === 0 ? gen.games[g].home || 'Home' : gen.games[g].away || 'Away'),
+            trusted: !isBtts(gen.games[g]) && gen.games[g].trusted === o,
+            symbol: outcomeSymbol(gen.games[g], o),
+            title: isBtts(gen.games[g]) ? pickLabel(gen.games[g], o) : o === 1 ? 'Draw' : (o === 0 ? gen.games[g].home || 'Home' : gen.games[g].away || 'Away'),
             subtitle: `${(gen.probs[g][o] * 100).toFixed(1)}%`,
             onPath,
             compact: false,
@@ -497,7 +501,8 @@ export function buildTree(gen: Generated, picks: Outcome[]) {
           outcome: o,
           game: g,
           prefix: pre,
-          trusted: gen.games[g].trusted === o,
+          trusted: !isBtts(gen.games[g]) && gen.games[g].trusted === o,
+            symbol: outcomeSymbol(gen.games[g], o),
           title: compact ? (isLeaf ? `#${combo} · ${shortLabel(gen, g, o)}` : shortLabel(gen, g, o)) : pickLabel(gen.games[g], o),
           subtitle: isLeaf ? `Slip #${combo}` : `Game ${g + 1}`,
           onPath,
@@ -537,6 +542,7 @@ export function buildTree(gen: Generated, picks: Outcome[]) {
 
 function shortLabel(gen: Generated, g: number, o: Outcome) {
   const game = gen.games[g];
+  if (isBtts(game)) return o === 0 ? 'GG' : 'NG';
   if (o === 1) return 'Draw';
   const t = (o === 0 ? game.home : game.away) || (o === 0 ? 'Home' : 'Away');
   return t.length > 11 ? `${t.slice(0, 10)}…` : t;

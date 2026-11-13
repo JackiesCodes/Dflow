@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { activeOutcomes, formatMoney, gameHasOdds, normalisedProbs, validOdds } from '../lib/combinatorics';
+import { activeOutcomes, formatMoney, gameHasOdds, isBtts, normalisedProbs, outcomeSymbol, validOdds } from '../lib/combinatorics';
 import type { Game, Outcome } from '../lib/types';
-import { OUTCOMES, OUTCOME_NAME, OUTCOME_SYMBOL } from '../lib/types';
+import { OUTCOMES, OUTCOME_NAME } from '../lib/types';
 import { Button, Icon, ICONS, OUTCOME_STYLES } from './ui';
 
 interface Props {
@@ -84,7 +84,9 @@ function GameCard({
   const activeCount = activeOutcomes(game).length;
   const probs = normalisedProbs(game);
 
-  const trusted: Outcome | null = game.trusted === 0 || game.trusted === 1 || game.trusted === 2 ? game.trusted : null;
+  const btts = isBtts(game);
+  const trusted: Outcome | null = !btts && (game.trusted === 0 || game.trusted === 1 || game.trusted === 2) ? game.trusted : null;
+  const setMarket = (market: '1x2' | 'btts') => onUpdate({ market, trusted: null });
   const trustedName = trusted === 0 ? game.home || 'Home' : trusted === 2 ? game.away || 'Away' : '';
   const trustLabel = trusted === 1 ? 'Draw in every slip' : `${trustedName} win or draw`;
   const toggleTrust = (o: Outcome) => onUpdate({ trusted: trusted === o ? null : o });
@@ -118,14 +120,33 @@ function GameCard({
             <span className="ml-1.5 font-normal">· {activeCount} outcome{activeCount === 1 ? '' : 's'}</span>
           )}
         </span>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="-m-1 rounded-md p-2 text-ink-400 hover:bg-flame-50 hover:text-flame-600 dark:hover:bg-flame-950/50"
-          aria-label={`Remove game ${index + 1}`}
-        >
-          <Icon d={ICONS.trash} className="size-3.5" />
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <div className="inline-flex rounded-md border border-ink-200 p-0.5 text-[11px] font-semibold dark:border-ink-700" role="group" aria-label="Market">
+            {([['1x2', '1X2'], ['btts', 'Both score']] as const).map(([m, label]) => {
+              const on = (game.market ?? '1x2') === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMarket(m)}
+                  aria-pressed={on}
+                  title={m === 'btts' ? 'Both teams to score: GG (yes) or NG (no)' : 'Match result: 1 / X / 2'}
+                  className={`rounded px-2 py-1 sm:py-0.5 ${on ? 'bg-ink-900 text-white dark:bg-brand-500 dark:text-ink-950' : 'text-ink-500 dark:text-ink-400'}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="rounded-md p-2 text-ink-400 hover:bg-flame-50 hover:text-flame-600 dark:hover:bg-flame-950/50"
+            aria-label={`Remove game ${index + 1}`}
+          >
+            <Icon d={ICONS.trash} className="size-3.5" />
+          </button>
+        </div>
       </div>
       <div className="flex items-center gap-1.5">
         {([0, 2] as const).map((side) => {
@@ -135,13 +156,13 @@ function GameCard({
           return (
             <div key={side} className={`relative min-w-0 flex-1 ${side === 2 ? 'order-3' : ''}`}>
               <input
-                className={`${inputCls} pr-10 sm:pr-8 ${isTrusted ? '!border-brand-500 font-semibold ring-2 ring-brand-500/25' : ''}`}
+                className={`${inputCls} ${btts ? '' : 'pr-10 sm:pr-8'} ${isTrusted ? '!border-brand-500 font-semibold ring-2 ring-brand-500/25' : ''}`}
                 placeholder={`${label} team`}
                 value={name}
                 onChange={(e) => onUpdate(side === 0 ? { home: e.target.value } : { away: e.target.value })}
                 aria-label={`Game ${index + 1} ${label.toLowerCase()} team`}
               />
-              <button
+              {!btts && <button
                 type="button"
                 onClick={() => toggleTrust(side)}
                 aria-pressed={isTrusted}
@@ -154,10 +175,13 @@ function GameCard({
                 }`}
               >
                 <Icon d={isTrusted ? ICONS.shieldCheck : ICONS.shield} className="size-4 sm:size-3.5" />
-              </button>
+              </button>}
             </div>
           );
         })}
+        {btts ? (
+          <span className="order-2 text-xs text-ink-400">vs</span>
+        ) : (
         <button
           type="button"
           onClick={() => toggleTrust(1)}
@@ -173,9 +197,10 @@ function GameCard({
           <DrawShield active={drawTrusted} />
           <span className="mt-0.5 sm:hidden">vs</span>
         </button>
+        )}
       </div>
       <div className="mt-2 flex items-center gap-1.5">
-        {OUTCOMES.map((o) => {
+        {(btts ? ([0, 2] as Outcome[]) : OUTCOMES).map((o) => {
           const on = trusted !== null ? activeOutcomes(game).includes(o) : game.active[o];
           const locked = trusted !== null;
           return (
@@ -185,7 +210,7 @@ function GameCard({
               onClick={() => toggle(o)}
               aria-pressed={on}
               aria-disabled={locked}
-              title={locked ? `${on ? 'Included' : 'Excluded'}: ${drawTrusted ? 'the draw is trusted' : `${trustedName} is trusted not to lose`}` : `${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
+              title={locked ? `${on ? 'Included' : 'Excluded'}: ${drawTrusted ? 'the draw is trusted' : `${trustedName} is trusted not to lose`}` : `${btts ? (o === 0 ? 'Both teams score' : 'Not both teams score') : OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
               className={`flex h-10 flex-1 items-center justify-center gap-1 rounded-lg border text-sm font-semibold sm:h-8 sm:rounded-md sm:text-xs transition-colors ${
                 on
                   ? OUTCOME_STYLES[o].solid
@@ -195,8 +220,8 @@ function GameCard({
               }`}
             >
               {locked && on && <Icon d={ICONS.lock} className="size-3" />}
-              {OUTCOME_SYMBOL[o]}
-              <span className="font-normal">{o === 0 ? 'Home' : o === 1 ? 'Draw' : 'Away'}</span>
+              {outcomeSymbol(game, o)}
+              <span className="font-normal">{btts ? (o === 0 ? 'Yes' : 'No') : o === 0 ? 'Home' : o === 1 ? 'Draw' : 'Away'}</span>
             </button>
           );
         })}
@@ -257,8 +282,10 @@ function OddsDropdown({
     next[o] = v === '' || !Number.isFinite(n) ? null : n;
     onUpdate({ odds: next });
   };
-  const label = (o: Outcome) => (o === 1 ? 'Draw' : o === 0 ? game.home || 'Home' : game.away || 'Away');
-  const ALL: Outcome[] = [0, 1, 2];
+  const btts = isBtts(game);
+  const label = (o: Outcome) =>
+    btts ? (o === 0 ? 'Both score' : 'Not both') : o === 1 ? 'Draw' : o === 0 ? game.home || 'Home' : game.away || 'Away';
+  const ALL: Outcome[] = btts ? [0, 2] : [0, 1, 2];
 
   return (
     <div className="mt-2 rounded-lg border border-ink-200 dark:border-ink-800">
@@ -271,7 +298,7 @@ function OddsDropdown({
         <span className="font-semibold text-ink-700 dark:text-ink-200">Odds</span>
         <span className="min-w-0 flex-1 truncate tabular-nums text-ink-500 dark:text-ink-400">
           {anyOdds
-            ? ALL.map((o) => `${OUTCOME_SYMBOL[o]} ${validOdds(odds[o]) ? (odds[o] as number).toFixed(2) : '–'}`).join('   ')
+            ? ALL.map((o) => `${outcomeSymbol(game, o)} ${validOdds(odds[o]) ? (odds[o] as number).toFixed(2) : '–'}`).join('   ')
             : 'Tap to add odds'}
         </span>
         {anyOdds && !complete && (
@@ -283,14 +310,14 @@ function OddsDropdown({
       </button>
       {open && (
         <div className="border-t border-ink-200 p-2 dark:border-ink-800">
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className={`grid gap-1.5 ${btts ? 'grid-cols-2' : 'grid-cols-3'}`}>
             {ALL.map((o) => {
               const inSlips = act.includes(o);
               return (
                 <label key={o} className={`min-w-0 text-[11px] ${inSlips ? '' : 'opacity-40'}`}>
                   <span className="mb-0.5 flex items-center gap-1 font-medium text-ink-600 dark:text-ink-300">
-                    <span className={`inline-flex size-4 shrink-0 items-center justify-center rounded border text-[9px] font-bold ${OUTCOME_STYLES[o].solid}`}>
-                      {OUTCOME_SYMBOL[o]}
+                    <span className={`inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded border px-0.5 text-[9px] font-bold ${OUTCOME_STYLES[o].solid}`}>
+                      {outcomeSymbol(game, o)}
                     </span>
                     <span className="truncate">{label(o)}</span>
                   </span>

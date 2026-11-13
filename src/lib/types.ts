@@ -19,6 +19,8 @@ export interface Game {
    * `active` is kept untouched so removing the badge restores the previous selection.
    */
   trusted?: Outcome | null;
+  /** Betting market: match result (1 / X / 2) or both teams to score (GG / NG). */
+  market?: '1x2' | 'btts';
   /** Decimal odds for 1 / X / 2 (null = not entered). */
   odds?: [number | null, number | null, number | null];
 }

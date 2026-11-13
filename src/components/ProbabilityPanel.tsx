@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { correctPicksDistribution, formatMoney, formatOdds, formatOneIn, formatPct, moneySummary, pickLabel, rowIndexOf } from '../lib/combinatorics';
+import { correctPicksDistribution, formatMoney, formatOdds, formatOneIn, formatPct, moneySummary, outcomeSymbol, pickLabel, rowIndexOf } from '../lib/combinatorics';
 import type { Generated, Outcome } from '../lib/types';
-import { OUTCOME_SYMBOL } from '../lib/types';
 import { OutcomePill } from './ui';
 
 interface Props {
@@ -87,7 +86,7 @@ export function ProbabilityPanel({ gen, picks, balance }: Props) {
                 G{g + 1} {game.home || 'Home'} v {game.away || 'Away'}
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
-                <OutcomePill outcome={picks[g]} label={`${OUTCOME_SYMBOL[picks[g]]} ${pickLabel(game, picks[g])}`} />
+                <OutcomePill outcome={picks[g]} label={`${outcomeSymbol(game, picks[g])} ${pickLabel(game, picks[g])}`} />
                 <span className="w-11 text-right tabular-nums text-ink-500">
                   {gen.hasOdds ? `@${formatOdds(game.odds?.[picks[g]] ?? NaN)}` : `${(gen.probs[g][picks[g]] * 100).toFixed(1)}%`}
                 </span>
@@ -104,7 +103,7 @@ export function ProbabilityPanel({ gen, picks, balance }: Props) {
           value={uniform ? formatPct(1 / gen.total) : formatPct(gen.activeByGame.reduce<number>((a, act) => a / act.length, 1))}
           hint={uniform ? `Π (1 / active outcomes)` : 'if all outcomes were equal'}
         />
-        {!uniform && <Metric label="Most likely slip" value={formatPct(bestProb)} hint={best.map((o) => OUTCOME_SYMBOL[o]).join('-')} />}
+        {!uniform && <Metric label="Most likely slip" value={formatPct(bestProb)} hint={best.map((o, g) => outcomeSymbol(gen.games[g], o)).join('-')} />}
         <Metric label="Play every slip" value="100%" hint={`${gen.total.toLocaleString()} slips guarantee a winner`} />
       </section>
 

@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import type { Outcome } from '../lib/types';
+import { outcomeSymbol } from '../lib/combinatorics';
+import type { Game, Outcome } from '../lib/types';
 
 export const OUTCOME_STYLES: Record<
   Outcome,
@@ -85,21 +86,30 @@ export function OutcomePill({ outcome, label, className = '' }: { outcome: Outco
 }
 
 /** Compact row of coloured 1 / X / 2 squares — one per game. */
-export function SlipChips({ picks, className = '', size = 'md' }: { picks: ArrayLike<number>; className?: string; size?: 'sm' | 'md' }) {
+export function SlipChips({
+  picks,
+  games,
+  className = '',
+  size = 'md',
+}: {
+  picks: ArrayLike<number>;
+  games?: Game[];
+  className?: string;
+  size?: 'sm' | 'md';
+}) {
   const items = Array.from(picks) as Outcome[];
   const dim = size === 'sm' ? 'h-5 min-w-5 text-[10px]' : 'h-6 min-w-6 text-xs';
   return (
-    <span className={`flex items-center gap-1 overflow-hidden ${className}`} aria-label={items.map((o) => OUTCOME_SYMBOL_MAP[o]).join('-')}>
+    <span className={`flex items-center gap-1 overflow-hidden ${className}`} aria-label={items.map((o, i) => outcomeSymbol(games?.[i], o)).join('-')}>
       {items.map((o, i) => (
         <span key={i} className={`inline-flex shrink-0 items-center justify-center rounded-md border px-1 font-bold ${dim} ${OUTCOME_STYLES[o].solid}`}>
-          {OUTCOME_SYMBOL_MAP[o]}
+          {outcomeSymbol(games?.[i], o)}
         </span>
       ))}
     </span>
   );
 }
 
-const OUTCOME_SYMBOL_MAP: Record<Outcome, string> = { 0: '1', 1: 'X', 2: '2' };
 
 export function Icon({ d, className = 'size-4' }: { d: string; className?: string }) {
   return (
