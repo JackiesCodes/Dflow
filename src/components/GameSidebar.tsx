@@ -80,9 +80,11 @@ function GameCard({
   const probs = normalisedProbs(game);
   const customWeights = !(game.weights[0] === game.weights[1] && game.weights[1] === game.weights[2]);
 
-  const trusted = game.trusted === 0 || game.trusted === 2 ? game.trusted : null;
-  const trustedName = trusted === null ? '' : (trusted === 0 ? game.home || 'Home' : game.away || 'Away');
-  const toggleTrust = (side: 0 | 2) => onUpdate({ trusted: trusted === side ? null : side });
+  const trusted: Outcome | null = game.trusted === 0 || game.trusted === 1 || game.trusted === 2 ? game.trusted : null;
+  const trustedName = trusted === 0 ? game.home || 'Home' : trusted === 2 ? game.away || 'Away' : '';
+  const trustLabel = trusted === 1 ? 'Draw in every slip' : `${trustedName} win or draw`;
+  const toggleTrust = (o: Outcome) => onUpdate({ trusted: trusted === o ? null : o });
+  const drawTrusted = trusted === 1;
 
   const toggle = (o: Outcome) => {
     if (trusted !== null) return; // locked by the trust badge
@@ -113,7 +115,7 @@ function GameCard({
           Game {index + 1}
           {trusted !== null ? (
             <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-brand-500 px-1.5 py-0.5 text-[10px] font-bold text-ink-950">
-              <Icon d={ICONS.shieldCheck} className="size-2.5" /> {trustedName} win or draw
+              <Icon d={ICONS.shieldCheck} className="size-2.5" /> {trustLabel}
             </span>
           ) : (
             <span className="ml-1.5 font-normal">· {activeCount} outcome{activeCount === 1 ? '' : 's'}</span>
@@ -159,11 +161,25 @@ function GameCard({
             </div>
           );
         })}
-        <span className="order-2 text-xs text-ink-400">vs</span>
+        <button
+          type="button"
+          onClick={() => toggleTrust(1)}
+          aria-pressed={drawTrusted}
+          aria-label={drawTrusted ? 'Remove trust from the draw' : 'Trust the draw'}
+          title={drawTrusted ? 'Trusted: this game ends in a draw in every slip. Tap to remove.' : 'Trust the draw — this game is a draw in every slip'}
+          className={`order-2 flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg text-[10px] font-bold leading-none transition-colors sm:h-8 sm:w-8 ${
+            drawTrusted
+              ? 'bg-white text-ink-950 ring-2 ring-brand-500 dark:bg-white'
+              : 'text-ink-400 hover:bg-ink-100 hover:text-ink-600 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-300'
+          }`}
+        >
+          <DrawShield active={drawTrusted} />
+          <span className="mt-0.5 sm:hidden">vs</span>
+        </button>
       </div>
       <div className="mt-2 flex items-center gap-1.5">
         {OUTCOMES.map((o) => {
-          const on = trusted !== null ? o === 1 || o === trusted : game.active[o];
+          const on = trusted !== null ? activeOutcomes(game).includes(o) : game.active[o];
           const locked = trusted !== null;
           return (
             <button
@@ -172,7 +188,7 @@ function GameCard({
               onClick={() => toggle(o)}
               aria-pressed={on}
               aria-disabled={locked}
-              title={locked ? (on ? `Included: ${trustedName} is trusted not to lose` : `Excluded: ${trustedName} is trusted not to lose`) : `${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
+              title={locked ? `${on ? 'Included' : 'Excluded'}: ${drawTrusted ? 'the draw is trusted' : `${trustedName} is trusted not to lose`}` : `${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
               className={`flex h-10 flex-1 items-center justify-center gap-1 rounded-lg border text-sm font-semibold sm:h-8 sm:rounded-md sm:text-xs transition-colors ${
                 on
                   ? OUTCOME_STYLES[o].solid
@@ -236,5 +252,21 @@ function GameCard({
         </div>
       )}
     </div>
+  );
+}
+
+/** Shield with an "X" — the trust badge for the draw. */
+function DrawShield({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 sm:size-[18px]" aria-hidden>
+      <path
+        d="M12 2.5l7.5 3.2v5.8c0 4.8-3.1 8.3-7.5 10-4.4-1.7-7.5-5.2-7.5-10V5.7z"
+        fill={active ? '#8bc43f' : 'none'}
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+      />
+      <path d="M9.3 8.8l5.4 5.4M14.7 8.8l-5.4 5.4" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+    </svg>
   );
 }

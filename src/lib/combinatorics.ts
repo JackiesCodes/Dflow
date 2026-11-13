@@ -8,6 +8,8 @@ export function activeOutcomes(game: Game): Outcome[] {
   // Trusted team won't lose: their win or the draw, never the loss.
   if (game.trusted === 0) return [0, 1];
   if (game.trusted === 2) return [1, 2];
+  // Trusted draw: the game ends level in every slip.
+  if (game.trusted === 1) return [1];
   return OUTCOMES.filter((o) => game.active[o]);
 }
 

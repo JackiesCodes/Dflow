@@ -78,3 +78,16 @@ describe('trust badge', () => {
     expect(generate([{ ...g, trusted: 0 }]).activeByGame[0]).toEqual([0, 1]);
   });
 });
+
+describe('draw trust badge', () => {
+  it('puts the draw in every slip for that game', () => {
+    const games = sampleGames();
+    games[0] = { ...games[0], trusted: 0 };
+    games[1] = { ...games[1], trusted: 2 };
+    games[2] = { ...games[2], trusted: 1 }; // Bayern v Dortmund: draw
+    const gen = generate(games);
+    expect(gen.total).toBe(36); // 2 × 2 × 1 × 3 × 3
+    for (let r = 0; r < gen.total; r++) expect(rowPicks(gen, r)[2]).toBe(1);
+    expect(gen.probs[2]).toEqual([0, 1, 0]);
+  });
+});
