@@ -53,3 +53,24 @@ describe('combinations', () => {
     expect(Array.from(gen.rowProb)).toEqual([0.5, 0.25, 0.25]);
   });
 });
+
+describe('trust badge', () => {
+  it('locks the trusted win into every slip and restores on removal', () => {
+    const games = sampleGames();
+    games[0] = { ...games[0], trusted: 0 }; // Arsenal
+    games[1] = { ...games[1], trusted: 2 }; // Barcelona
+    const gen = generate(games);
+    expect(gen.total).toBe(27);
+    for (let r = 0; r < gen.total; r++) {
+      const p = rowPicks(gen, r);
+      expect(p[0]).toBe(0);
+      expect(p[1]).toBe(2);
+    }
+    expect(gen.probs[0][0]).toBe(1);
+    expect(gen.rowProb[0]).toBeCloseTo(1 / 27, 12);
+    // Removing trust brings back the previously ticked outcomes.
+    const limited: Game = { ...games[2], active: [true, false, true], trusted: 0 };
+    expect(countCombinations([limited])).toBe(1);
+    expect(countCombinations([{ ...limited, trusted: null }])).toBe(2);
+  });
+});

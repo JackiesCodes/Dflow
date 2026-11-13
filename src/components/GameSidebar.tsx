@@ -80,7 +80,12 @@ function GameCard({
   const probs = normalisedProbs(game);
   const customWeights = !(game.weights[0] === game.weights[1] && game.weights[1] === game.weights[2]);
 
+  const trusted = game.trusted === 0 || game.trusted === 2 ? game.trusted : null;
+  const trustedName = trusted === null ? '' : (trusted === 0 ? game.home || 'Home' : game.away || 'Away');
+  const toggleTrust = (side: 0 | 2) => onUpdate({ trusted: trusted === side ? null : side });
+
   const toggle = (o: Outcome) => {
+    if (trusted !== null) return; // locked by the trust badge
     if (game.active[o] && activeCount === 1) return; // keep at least one outcome
     const active = [...game.active] as Game['active'];
     active[o] = !active[o];
@@ -98,11 +103,21 @@ function GameCard({
     'h-10 w-full min-w-0 rounded-lg border border-ink-300 bg-white px-2.5 text-base sm:h-8 sm:rounded-md sm:px-2 sm:text-sm placeholder:text-ink-400 focus:border-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-700/30 dark:border-ink-700 dark:bg-ink-950';
 
   return (
-    <div className="rounded-xl border border-ink-200 bg-white p-3 shadow-sm dark:border-ink-800 dark:bg-ink-900">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-semibold text-ink-500 dark:text-ink-400">
+    <div
+      className={`rounded-xl border bg-white p-3 shadow-sm dark:bg-ink-900 ${
+        trusted !== null ? 'border-brand-500 ring-1 ring-brand-500/40' : 'border-ink-200 dark:border-ink-800'
+      }`}
+    >
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className="min-w-0 truncate text-xs font-semibold text-ink-500 dark:text-ink-400">
           Game {index + 1}
-          <span className="ml-1.5 font-normal">· {activeCount} outcome{activeCount === 1 ? '' : 's'}</span>
+          {trusted !== null ? (
+            <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-brand-500 px-1.5 py-0.5 text-[10px] font-bold text-ink-950">
+              <Icon d={ICONS.lock} className="size-2.5" /> {trustedName} win in every slip
+            </span>
+          ) : (
+            <span className="ml-1.5 font-normal">· {activeCount} outcome{activeCount === 1 ? '' : 's'}</span>
+          )}
         </span>
         <button
           type="button"
@@ -114,38 +129,59 @@ function GameCard({
         </button>
       </div>
       <div className="flex items-center gap-1.5">
-        <input
-          className={inputCls}
-          placeholder="Home team"
-          value={game.home}
-          onChange={(e) => onUpdate({ home: e.target.value })}
-          aria-label={`Game ${index + 1} home team`}
-        />
-        <span className="text-xs text-ink-400">vs</span>
-        <input
-          className={inputCls}
-          placeholder="Away team"
-          value={game.away}
-          onChange={(e) => onUpdate({ away: e.target.value })}
-          aria-label={`Game ${index + 1} away team`}
-        />
+        {([0, 2] as const).map((side) => {
+          const isTrusted = trusted === side;
+          const name = side === 0 ? game.home : game.away;
+          const label = side === 0 ? 'Home' : 'Away';
+          return (
+            <div key={side} className={`relative min-w-0 flex-1 ${side === 2 ? 'order-3' : ''}`}>
+              <input
+                className={`${inputCls} pr-10 sm:pr-8 ${isTrusted ? '!border-brand-500 font-semibold ring-2 ring-brand-500/25' : ''}`}
+                placeholder={`${label} team`}
+                value={name}
+                onChange={(e) => onUpdate(side === 0 ? { home: e.target.value } : { away: e.target.value })}
+                aria-label={`Game ${index + 1} ${label.toLowerCase()} team`}
+              />
+              <button
+                type="button"
+                onClick={() => toggleTrust(side)}
+                aria-pressed={isTrusted}
+                aria-label={`${isTrusted ? 'Remove trust from' : 'Trust'} ${name || label}`}
+                title={isTrusted ? `Trusted: ${name || label} win is in every slip. Tap to remove.` : `Trust ${name || label} — lock their win into every slip`}
+                className={`absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md transition-colors sm:size-6 ${
+                  isTrusted
+                    ? 'bg-brand-500 text-ink-950'
+                    : 'text-ink-300 hover:bg-ink-100 hover:text-ink-600 dark:text-ink-600 dark:hover:bg-ink-800 dark:hover:text-ink-300'
+                }`}
+              >
+                <Icon d={isTrusted ? ICONS.shieldCheck : ICONS.shield} className="size-4 sm:size-3.5" />
+              </button>
+            </div>
+          );
+        })}
+        <span className="order-2 text-xs text-ink-400">vs</span>
       </div>
       <div className="mt-2 flex items-center gap-1.5">
         {OUTCOMES.map((o) => {
-          const on = game.active[o];
+          const on = trusted !== null ? trusted === o : game.active[o];
+          const locked = trusted !== null;
           return (
             <button
               key={o}
               type="button"
               onClick={() => toggle(o)}
               aria-pressed={on}
-              title={`${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
+              aria-disabled={locked}
+              title={locked ? `Locked by the trust badge on ${trustedName}` : `${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
               className={`flex h-10 flex-1 items-center justify-center gap-1 rounded-lg border text-sm font-semibold sm:h-8 sm:rounded-md sm:text-xs transition-colors ${
                 on
                   ? OUTCOME_STYLES[o].solid
-                  : 'border-ink-300 bg-transparent text-ink-400 line-through dark:border-ink-700 dark:text-ink-500'
+                  : locked
+                    ? 'cursor-not-allowed border-dashed border-ink-200 bg-transparent text-ink-300 dark:border-ink-800 dark:text-ink-600'
+                    : 'border-ink-300 bg-transparent text-ink-400 line-through dark:border-ink-700 dark:text-ink-500'
               }`}
             >
+              {locked && on && <Icon d={ICONS.lock} className="size-3" />}
               {OUTCOME_SYMBOL[o]}
               <span className="font-normal">{o === 0 ? 'Home' : o === 1 ? 'Draw' : 'Away'}</span>
             </button>

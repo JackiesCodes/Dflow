@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import {
   HARD_LIMIT,
+  activeOutcomes,
   WARN_THRESHOLD,
   countCombinations,
   formatBig,
@@ -39,7 +40,7 @@ function useMediaQuery(q: string) {
 }
 
 const gamesSignature = (games: Game[]) =>
-  JSON.stringify(games.map((g) => [g.home, g.away, g.active, g.weights]));
+  JSON.stringify(games.map((g) => [g.home, g.away, g.active, g.weights, g.trusted ?? null]));
 
 const TAB_IDS: Tab[] = ['games', 'graph', 'table', 'prob'];
 
@@ -227,7 +228,7 @@ export default function App() {
           <Stat label="Total combinations" value={comboLabel} tone={comboTone} />
           {games.length > 0 && (
             <span className="hidden text-xs text-ink-400 xl:inline" title="Product of active outcomes per game">
-              = {games.map((g) => g.active.filter(Boolean).length).join(' × ')}
+              = {games.map((g) => activeOutcomes(g).length).join(' × ')}
             </span>
           )}
         </div>

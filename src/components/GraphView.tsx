@@ -30,6 +30,8 @@ type OutcomeData = {
   game: number;
   prefix?: Outcome[];
   vertical?: boolean;
+  /** Locked in by the trust badge. */
+  trusted?: boolean;
 };
 type CollapsedData = { kind: 'collapsed'; game: number; title: string; count: number; onPath: boolean; pick?: string; vertical?: boolean };
 type HeaderData = {
@@ -57,7 +59,7 @@ const OutcomeNode = memo(({ data }: NodeProps<Node<OutcomeData, 'outcome'>>) => 
   const s = OUTCOME_STYLES[data.outcome];
   return (
     <div
-      className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 shadow-sm transition-all ${
+      className={`relative flex cursor-pointer items-center gap-2 rounded-lg border-2 shadow-sm transition-all ${
         data.onPath ? `${s.solid} ring-4 ${s.ring}` : s.soft
       } ${
         data.vertical
@@ -80,6 +82,13 @@ const OutcomeNode = memo(({ data }: NodeProps<Node<OutcomeData, 'outcome'>>) => 
         <span className="block truncate font-semibold">{data.title}</span>
         {data.subtitle && !data.compact && <span className="block truncate opacity-75">{data.subtitle}</span>}
       </span>
+      {data.trusted && (
+        <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-brand-500 text-ink-950 shadow ring-2 ring-white dark:ring-ink-950" title="Trusted — in every slip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="size-3" aria-hidden>
+            <path d="M12 3l7 3v5.5c0 4.6-3 7.9-7 9.5-4-1.6-7-4.9-7-9.5V6zM8.8 12.2l2.2 2.2 4.2-4.4" />
+          </svg>
+        </span>
+      )}
       <Handle type="source" position={outPos(data.vertical)} className={HANDLE} />
     </div>
   );
@@ -329,6 +338,7 @@ function buildFlow(gen: Generated, picks: Outcome[], collapsed: Set<number>, ver
             kind: 'outcome',
             outcome: o,
             game: g,
+            trusted: gen.games[g].trusted === o,
             title: pickLabel(gen.games[g], o),
             subtitle: `${OUTCOME_SYMBOL[o]} · ${(gen.probs[g][o] * 100).toFixed(1)}%`,
             onPath,
@@ -416,6 +426,7 @@ function buildVerticalFlow(gen: Generated, picks: Outcome[], collapsed: Set<numb
             kind: 'outcome',
             outcome: o,
             game: g,
+            trusted: gen.games[g].trusted === o,
             title: o === 1 ? 'Draw' : (o === 0 ? gen.games[g].home || 'Home' : gen.games[g].away || 'Away'),
             subtitle: `${(gen.probs[g][o] * 100).toFixed(1)}%`,
             onPath,
@@ -485,6 +496,7 @@ function buildTree(gen: Generated, picks: Outcome[]) {
           outcome: o,
           game: g,
           prefix: pre,
+          trusted: gen.games[g].trusted === o,
           title: compact ? (isLeaf ? `#${combo} · ${shortLabel(gen, g, o)}` : shortLabel(gen, g, o)) : pickLabel(gen.games[g], o),
           subtitle: isLeaf ? `Slip #${combo}` : `Game ${g + 1}`,
           onPath,

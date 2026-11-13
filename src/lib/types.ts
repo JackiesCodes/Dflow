@@ -14,6 +14,12 @@ export interface Game {
   active: [boolean, boolean, boolean];
   /** Relative likelihood weights, indexed by Outcome. Only active outcomes count. */
   weights: [number, number, number];
+  /**
+   * Trust badge: a team the user is sure will win. When set, that win is locked
+   * into every slip (the game contributes a single outcome). `active` is kept
+   * untouched so removing the badge restores the previous selection.
+   */
+  trusted?: 0 | 2 | null;
 }
 
 /** Immutable snapshot of games used to produce a result set. */

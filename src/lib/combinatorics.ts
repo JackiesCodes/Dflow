@@ -5,6 +5,7 @@ export const WARN_THRESHOLD = 100_000;
 export const HARD_LIMIT = 1_000_000;
 
 export function activeOutcomes(game: Game): Outcome[] {
+  if (game.trusted === 0 || game.trusted === 2) return [game.trusted];
   return OUTCOMES.filter((o) => game.active[o]);
 }
 
@@ -24,7 +25,7 @@ export function normalisedProbs(game: Game): number[] {
   const act = activeOutcomes(game);
   const sum = act.reduce<number>((s, o) => s + Math.max(0, game.weights[o] || 0), 0);
   return OUTCOMES.map((o) => {
-    if (!game.active[o]) return 0;
+    if (!act.includes(o)) return 0;
     return sum > 0 ? Math.max(0, game.weights[o] || 0) / sum : 1 / act.length;
   });
 }
