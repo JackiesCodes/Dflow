@@ -42,7 +42,7 @@ function useMediaQuery(q: string) {
 }
 
 const gamesSignature = (games: Game[]) =>
-  JSON.stringify(games.map((g) => [g.home, g.away, g.active, g.weights, g.trusted ?? null]));
+  JSON.stringify(games.map((g) => [g.home, g.away, g.active, g.trusted ?? null, g.odds ?? null]));
 
 const TAB_IDS: Tab[] = ['games', 'graph', 'table', 'prob'];
 
@@ -324,7 +324,7 @@ export default function App() {
           <aside className="hidden w-[340px] shrink-0 overflow-y-auto border-l border-ink-200 bg-ink-50 xl:block dark:border-ink-800 dark:bg-ink-900/50">
             <div className="border-b border-ink-200 px-4 py-3 dark:border-ink-800">
               <h2 className="text-sm font-semibold">Probability</h2>
-              <p className="text-xs text-ink-500 dark:text-ink-400">From your odds, or equal unless you set weights</p>
+              <p className="text-xs text-ink-500 dark:text-ink-400">From your odds, or equal chances where a game has none</p>
             </div>
             <ProbabilityPanel gen={gen} picks={picks} balance={balance} />
           </aside>

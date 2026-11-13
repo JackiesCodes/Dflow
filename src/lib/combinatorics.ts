@@ -34,19 +34,16 @@ export function gameHasOdds(game: Game): boolean {
 }
 
 /**
- * Normalised probabilities over active outcomes. When odds are entered they set the
- * probabilities (implied 1/odds, rescaled to remove the bookmaker margin); otherwise
- * the custom weights do (equal if all weights are 0).
+ * Normalised probabilities over active outcomes. When every included outcome has odds,
+ * they set the probabilities (implied 1/odds, rescaled to remove the bookmaker margin);
+ * otherwise the included outcomes are equally likely.
  */
 export function normalisedProbs(game: Game): number[] {
   const act = activeOutcomes(game);
   const useOdds = gameHasOdds(game);
-  const w = (o: Outcome) => (useOdds ? 1 / (game.odds![o] as number) : Math.max(0, game.weights[o] || 0));
+  const w = (o: Outcome) => (useOdds ? 1 / (game.odds![o] as number) : 1);
   const sum = act.reduce<number>((s, o) => s + w(o), 0);
-  return OUTCOMES.map((o) => {
-    if (!act.includes(o)) return 0;
-    return sum > 0 ? w(o) / sum : 1 / act.length;
-  });
+  return OUTCOMES.map((o) => (act.includes(o) ? w(o) / sum : 0));
 }
 
 /**
@@ -129,7 +126,7 @@ export function pickLabel(game: Game, o: Outcome): string {
 /**
  * Distribution of "exactly K correct picks" for a given slip.
  * Returns, for k = 0..N: how many combinations share exactly k picks with the slip,
- * and the probability (under the weights) that the real results match exactly k picks.
+ * and the probability (from the odds, or equal chances) that the real results match exactly k picks.
  */
 export function correctPicksDistribution(gen: Generated, picks: Outcome[]) {
   const n = gen.games.length;

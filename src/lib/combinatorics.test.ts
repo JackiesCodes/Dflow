@@ -60,8 +60,8 @@ describe('combinations', () => {
     expect(dist[5].prob).toBeCloseTo(1 / 243, 12);
   });
 
-  it('custom weights change probabilities', () => {
-    const g: Game = { ...makeGame(), weights: [2, 1, 1] };
+  it('odds change probabilities', () => {
+    const g: Game = { ...makeGame(), odds: [2, 4, 4] };
     const gen = generate([g]);
     expect(Array.from(gen.rowProb)).toEqual([0.5, 0.25, 0.25]);
   });
@@ -121,7 +121,7 @@ describe('odds and betting balance', () => {
   it('turns odds into probabilities with the bookmaker margin removed', () => {
     const g: Game = { ...makeGame('A', 'B'), odds: [2, 4, 4] };
     expect(normalisedProbs(g)).toEqual([0.5, 0.25, 0.25]);
-    // Missing odds fall back to the weights, and slips get no odds.
+    // Missing odds fall back to equal chances, and slips get no odds.
     const partial: Game = { ...g, odds: [2, null, 4] };
     expect(normalisedProbs(partial)).toEqual([1 / 3, 1 / 3, 1 / 3]);
     expect(generate([partial]).hasOdds).toBe(false);

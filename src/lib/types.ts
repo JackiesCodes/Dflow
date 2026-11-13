@@ -12,8 +12,6 @@ export interface Game {
   away: string;
   /** Which outcomes are included in the combinations, indexed by Outcome. */
   active: [boolean, boolean, boolean];
-  /** Relative likelihood weights, indexed by Outcome. Only active outcomes count. */
-  weights: [number, number, number];
   /**
    * Trust badge (one per game):
    * - 0 / 2: the home / away team won't lose — every slip has their win or the draw.

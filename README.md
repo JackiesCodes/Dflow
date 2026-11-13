@@ -20,7 +20,7 @@ Five sample fixtures are preloaded, so it opens on the 3⁵ = **243-combination*
   - *Layered flow*: one column per game, and every outcome connects to every outcome of the next game. Each path is one slip. It scales to any N, and you can collapse or expand each column. Columns after the 10th start collapsed.
   - Colours: green = home win, white = draw, black = away win. Click nodes to build or highlight a slip.
 - **Table view** (TanStack Table + TanStack Virtual): virtualised rows, sorting on every column, an outcome filter per game, global search (team, `1-X-2`, `draw`, `#57`), and CSV export of the filtered and sorted rows.
-- **Probability panel**: equal odds by default, or custom weights per outcome. Shows the selected slip's chance of winning, the most likely slip, and how many results give **exactly K correct picks** with the chance of each.
+- **Probability panel**: chances come from the odds you enter, or are equal for a game without odds. Shows the selected slip's chance of winning, the most likely slip, and how many results give **exactly K correct picks** with the chance of each.
 - Light and dark mode, a responsive layout with a mobile drawer, toasts and a loading indicator. Games are saved in `localStorage`.
 
 ## Run it
@@ -41,7 +41,7 @@ npm run build     # static build in dist/
 ```
 src/lib/combinatorics.ts   generation, row lookup, probabilities, exactly-K distribution
 src/lib/storage.ts         sample data + localStorage persistence
-src/components/GameSidebar.tsx      game / team / outcome / weight inputs
+src/components/GameSidebar.tsx      game / team / outcome / odds inputs, balance
 src/components/GraphView.tsx        decision tree + layered flow (React Flow)
 src/components/TableView.tsx        virtualised, sortable, filterable table + CSV
 src/components/ProbabilityPanel.tsx probability summary

@@ -9,7 +9,7 @@ export function newId(): string {
 }
 
 export function makeGame(home = '', away = ''): Game {
-  return { id: newId(), home, away, active: [true, true, true], weights: [1, 1, 1] };
+  return { id: newId(), home, away, active: [true, true, true] };
 }
 
 export const SAMPLE_GAMES: [string, string, [number, number, number]][] = [
@@ -31,8 +31,7 @@ function isGame(x: unknown): x is Game {
     typeof g.id === 'string' &&
     typeof g.home === 'string' &&
     typeof g.away === 'string' &&
-    Array.isArray(g.active) && g.active.length === 3 &&
-    Array.isArray(g.weights) && g.weights.length === 3
+    Array.isArray(g.active) && g.active.length === 3
   );
 }
 
@@ -41,7 +40,8 @@ export function loadGames(): Game[] {
     const raw = localStorage.getItem(KEY);
     if (raw === null) return sampleGames();
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.every(isGame)) return parsed;
+    // Older saves carried per-outcome weights; those are no longer used.
+    if (Array.isArray(parsed) && parsed.every(isGame)) return (parsed as (Game & { weights?: unknown })[]).map(({ weights: _w, ...g }) => g);
   } catch {
     /* storage unavailable or corrupt: fall back to sample data */
   }

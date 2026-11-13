@@ -81,10 +81,8 @@ function GameCard({
   onUpdate: (patch: Partial<Game>) => void;
   onRemove: () => void;
 }) {
-  const [showWeights, setShowWeights] = useState(false);
   const activeCount = activeOutcomes(game).length;
   const probs = normalisedProbs(game);
-  const customWeights = !(game.weights[0] === game.weights[1] && game.weights[1] === game.weights[2]);
 
   const trusted: Outcome | null = game.trusted === 0 || game.trusted === 1 || game.trusted === 2 ? game.trusted : null;
   const trustedName = trusted === 0 ? game.home || 'Home' : trusted === 2 ? game.away || 'Away' : '';
@@ -98,13 +96,6 @@ function GameCard({
     const active = [...game.active] as Game['active'];
     active[o] = !active[o];
     onUpdate({ active });
-  };
-
-  const setWeight = (o: Outcome, v: string) => {
-    const weights = [...game.weights] as Game['weights'];
-    const n = Number(v);
-    weights[o] = Number.isFinite(n) && n >= 0 ? n : 0;
-    onUpdate({ weights });
   };
 
   const inputCls =
@@ -209,54 +200,7 @@ function GameCard({
             </button>
           );
         })}
-        <button
-          type="button"
-          onClick={() => setShowWeights((s) => !s)}
-          className={`flex size-10 shrink-0 items-center justify-center rounded-lg border sm:size-8 sm:rounded-md ${
-            customWeights
-              ? 'border-brand-500 text-brand-700 dark:text-brand-300'
-              : 'border-ink-300 text-ink-500 dark:border-ink-700'
-          } hover:bg-ink-100 dark:hover:bg-ink-800`}
-          aria-expanded={showWeights}
-          title="Custom outcome weights"
-        >
-          <Icon d={ICONS.sliders} className="size-3.5" />
-        </button>
       </div>
-      {showWeights && (
-        <div className="mt-2 rounded-lg bg-ink-50 p-2 dark:bg-ink-950/60">
-          <p className="mb-1.5 text-[11px] text-ink-500 dark:text-ink-400">
-            Relative weights (e.g. 50 / 30 / 20). Only included outcomes count.
-          </p>
-          <div className="grid grid-cols-3 gap-1.5">
-            {OUTCOMES.map((o) => (
-              <label key={o} className={`text-[11px] ${game.active[o] ? '' : 'opacity-40'}`}>
-                <span className="mb-0.5 block font-medium">
-                  {OUTCOME_SYMBOL[o]} · {(probs[o] * 100).toFixed(1)}%
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  step="any"
-                  disabled={!game.active[o]}
-                  className={inputCls}
-                  value={game.weights[o]}
-                  onChange={(e) => setWeight(o, e.target.value)}
-                />
-              </label>
-            ))}
-          </div>
-          {customWeights && (
-            <button
-              type="button"
-              className="mt-1.5 text-[11px] text-brand-800 hover:underline dark:text-brand-300"
-              onClick={() => onUpdate({ weights: [1, 1, 1] })}
-            >
-              Reset to equal
-            </button>
-          )}
-        </div>
-      )}
       <OddsDropdown game={game} probs={probs} onUpdate={onUpdate} inputCls={inputCls} />
     </div>
   );
