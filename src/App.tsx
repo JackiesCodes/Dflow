@@ -237,7 +237,7 @@ export default function App() {
           <span
             className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums lg:hidden ${
               comboTone === 'error'
-                ? 'bg-flame-500 text-white'
+                ? 'bg-away text-white'
                 : comboTone === 'warn'
                   ? 'bg-gold-400 text-brand-950'
                   : 'bg-white/10 text-white ring-1 ring-white/15'

@@ -25,10 +25,10 @@ export const OUTCOME_STYLES: Record<
   },
   // 2 — Away: red
   2: {
-    solid: 'bg-flame-500 text-white border-flame-500',
+    solid: 'bg-away text-white border-away',
     soft: 'bg-flame-50 text-flame-700 border-flame-200 dark:bg-flame-950/70 dark:text-flame-200 dark:border-flame-800',
     ring: 'ring-flame-500/40',
-    dot: 'bg-flame-500',
+    dot: 'bg-away',
     dotText: 'text-white',
     hex: '#ee3124',
   },
