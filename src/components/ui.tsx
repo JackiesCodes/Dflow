@@ -78,6 +78,23 @@ export function OutcomePill({ outcome, label, className = '' }: { outcome: Outco
   );
 }
 
+/** Compact row of coloured 1 / X / 2 squares — one per game. */
+export function SlipChips({ picks, className = '', size = 'md' }: { picks: ArrayLike<number>; className?: string; size?: 'sm' | 'md' }) {
+  const items = Array.from(picks) as Outcome[];
+  const dim = size === 'sm' ? 'h-5 min-w-5 text-[10px]' : 'h-6 min-w-6 text-xs';
+  return (
+    <span className={`flex items-center gap-1 overflow-hidden ${className}`} aria-label={items.map((o) => OUTCOME_SYMBOL_MAP[o]).join('-')}>
+      {items.map((o, i) => (
+        <span key={i} className={`inline-flex shrink-0 items-center justify-center rounded-md px-1 font-bold ${dim} ${OUTCOME_STYLES[o].solid}`}>
+          {OUTCOME_SYMBOL_MAP[o]}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+const OUTCOME_SYMBOL_MAP: Record<Outcome, string> = { 0: '1', 1: 'X', 2: '2' };
+
 export function Icon({ d, className = 'size-4' }: { d: string; className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
@@ -101,5 +118,9 @@ export const ICONS = {
   shuffle: 'M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5',
   search: 'M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.3-4.3',
   alert: 'M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z',
+  graph: 'M5 6a2 2 0 100 4 2 2 0 000-4zM19 3a2 2 0 100 4 2 2 0 000-4zM19 17a2 2 0 100 4 2 2 0 000-4zM7 8l10-3M7 8l10 11',
+  table: 'M3 5h18v14H3zM3 10h18M3 15h18M9 5v14',
+  list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+  percent: 'M19 5L5 19M6.5 4a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM17.5 15a2.5 2.5 0 100 5 2.5 2.5 0 000-5z',
   target: 'M12 2a10 10 0 100 20 10 10 0 000-20zM12 6a6 6 0 100 12 6 6 0 000-12zM12 10a2 2 0 100 4 2 2 0 000-4z',
 };

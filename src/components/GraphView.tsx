@@ -29,10 +29,24 @@ type OutcomeData = {
   compact: boolean;
   game: number;
   prefix?: Outcome[];
+  vertical?: boolean;
 };
-type CollapsedData = { kind: 'collapsed'; game: number; title: string; count: number; onPath: boolean; pick?: string };
-type HeaderData = { kind: 'header'; game: number; title: string; subtitle: string; collapsed: boolean; canCollapse: boolean; narrow?: boolean };
-type StartData = { kind: 'start'; title: string };
+type CollapsedData = { kind: 'collapsed'; game: number; title: string; count: number; onPath: boolean; pick?: string; vertical?: boolean };
+type HeaderData = {
+  kind: 'header';
+  game: number;
+  title: string;
+  subtitle: string;
+  collapsed: boolean;
+  canCollapse: boolean;
+  narrow?: boolean;
+  vertical?: boolean;
+};
+type StartData = { kind: 'start'; title: string; vertical?: boolean };
+
+const inPos = (v?: boolean) => (v ? Position.Top : Position.Left);
+const outPos = (v?: boolean) => (v ? Position.Bottom : Position.Right);
+const HANDLE = '!size-1.5 !min-w-0 !border-0 !bg-slate-400';
 type FlowNode =
   | Node<OutcomeData, 'outcome'>
   | Node<CollapsedData, 'collapsed'>
@@ -45,10 +59,16 @@ const OutcomeNode = memo(({ data }: NodeProps<Node<OutcomeData, 'outcome'>>) => 
     <div
       className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 shadow-sm transition-all ${
         data.onPath ? `${s.solid} ring-4 ${s.ring}/30` : s.soft
-      } ${data.compact ? 'h-[26px] w-[120px] px-2 text-[11px]' : 'h-[52px] w-[176px] px-3 text-xs'}`}
+      } ${
+        data.vertical
+          ? 'h-[56px] w-[112px] gap-1.5 px-2 text-[11px]'
+          : data.compact
+            ? 'h-[26px] w-[120px] px-2 text-[11px]'
+            : 'h-[52px] w-[176px] px-3 text-xs'
+      }`}
       title={data.subtitle ? `${data.title} — ${data.subtitle}` : data.title}
     >
-      <Handle type="target" position={Position.Left} className="!size-1.5 !min-w-0 !border-0 !bg-slate-400" />
+      <Handle type="target" position={inPos(data.vertical)} className={HANDLE} />
       <span
         className={`flex shrink-0 items-center justify-center rounded font-bold ${
           data.compact ? 'size-4 text-[10px]' : 'size-6 text-xs'
@@ -60,28 +80,40 @@ const OutcomeNode = memo(({ data }: NodeProps<Node<OutcomeData, 'outcome'>>) => 
         <span className="block truncate font-semibold">{data.title}</span>
         {data.subtitle && !data.compact && <span className="block truncate opacity-75">{data.subtitle}</span>}
       </span>
-      <Handle type="source" position={Position.Right} className="!size-1.5 !min-w-0 !border-0 !bg-slate-400" />
+      <Handle type="source" position={outPos(data.vertical)} className={HANDLE} />
     </div>
   );
 });
 
 const CollapsedNode = memo(({ data }: NodeProps<Node<CollapsedData, 'collapsed'>>) => (
   <div
-    className={`flex h-[52px] w-[120px] flex-col items-center justify-center rounded-lg border-2 border-dashed text-xs ${
+    className={`flex h-[52px] ${data.vertical ? 'w-[112px]' : 'w-[120px]'} flex-col items-center justify-center rounded-lg border-2 border-dashed text-xs ${
       data.onPath
         ? 'border-indigo-500 bg-indigo-50 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200'
         : 'border-slate-300 bg-white text-slate-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300'
     }`}
     title="Collapsed column — click the header to expand"
   >
-    <Handle type="target" position={Position.Left} className="!size-1.5 !min-w-0 !border-0 !bg-slate-400" />
+    <Handle type="target" position={inPos(data.vertical)} className={HANDLE} />
     <span className="font-semibold">{data.title}</span>
     <span className="opacity-75">{data.pick ? `pick: ${data.pick}` : `${data.count} outcomes`}</span>
-    <Handle type="source" position={Position.Right} className="!size-1.5 !min-w-0 !border-0 !bg-slate-400" />
+    <Handle type="source" position={outPos(data.vertical)} className={HANDLE} />
   </div>
 ));
 
-const HeaderNode = memo(({ data }: NodeProps<Node<HeaderData, 'header'>>) => (
+const HeaderNode = memo(({ data }: NodeProps<Node<HeaderData, 'header'>>) =>
+  data.vertical ? (
+    <div
+      className={`flex w-[360px] items-center gap-2 rounded-lg px-1 py-1 text-xs ${data.canCollapse ? 'cursor-pointer' : ''}`}
+      title={data.canCollapse ? (data.collapsed ? 'Expand game' : 'Collapse game') : undefined}
+    >
+      <span className="shrink-0 rounded-md bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-slate-200 dark:text-slate-900">
+        {data.title.replace('Game ', 'G')}
+      </span>
+      <span className="min-w-0 flex-1 truncate font-semibold text-slate-700 dark:text-slate-200">{data.subtitle}</span>
+      {data.canCollapse && <span className="text-slate-400">{data.collapsed ? '▸' : '▾'}</span>}
+    </div>
+  ) : (
   <div
     className={`w-[176px] rounded-lg border border-slate-200 bg-white/90 px-3 py-1.5 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-900/90 ${
       data.canCollapse ? 'cursor-pointer hover:border-indigo-400' : ''
@@ -94,12 +126,15 @@ const HeaderNode = memo(({ data }: NodeProps<Node<HeaderData, 'header'>>) => (
     </div>
     {!data.collapsed && <div className="truncate text-slate-500 dark:text-slate-400">{data.subtitle}</div>}
   </div>
-));
+  ),
+);
 
 const StartNode = memo(({ data }: NodeProps<Node<StartData, 'start'>>) => (
-  <div className="flex h-[52px] w-[96px] items-center justify-center rounded-full border-2 border-slate-400 bg-slate-800 text-xs font-semibold text-white dark:border-slate-500 dark:bg-slate-200 dark:text-slate-900">
+  <div
+    className={`flex ${data.vertical ? 'h-[34px]' : 'h-[52px]'} w-[96px] items-center justify-center rounded-full border-2 border-slate-400 bg-slate-800 text-xs font-semibold text-white dark:border-slate-500 dark:bg-slate-200 dark:text-slate-900`}
+  >
     {data.title}
-    <Handle type="source" position={Position.Right} className="!size-1.5 !min-w-0 !border-0 !bg-slate-400" />
+    <Handle type="source" position={outPos(data.vertical)} className={HANDLE} />
   </div>
 ));
 
@@ -110,25 +145,28 @@ interface Props {
   picks: Outcome[];
   onSelect: (picks: Outcome[]) => void;
   dark: boolean;
+  /** Phone layout: the layered flow runs top-to-bottom, one row per game. */
+  vertical?: boolean;
 }
 
-export function GraphView({ gen, picks, onSelect, dark }: Props) {
+export function GraphView({ gen, picks, onSelect, dark, vertical = false }: Props) {
   const n = gen.games.length;
   const treeAllowed = gen.total <= TREE_LIMIT;
-  const [mode, setMode] = useState<Mode>(treeAllowed ? 'tree' : 'flow');
-  const [collapsed, setCollapsed] = useState<Set<number>>(() => defaultCollapsed(n));
+  const initialMode = (): Mode => (treeAllowed && !vertical ? 'tree' : 'flow');
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [collapsed, setCollapsed] = useState<Set<number>>(() => (vertical ? new Set() : defaultCollapsed(n)));
 
   // Reset view settings whenever a new result set is generated.
   useEffect(() => {
-    setMode(gen.total <= TREE_LIMIT ? 'tree' : 'flow');
-    setCollapsed(defaultCollapsed(gen.games.length));
-  }, [gen]);
+    setMode(gen.total <= TREE_LIMIT && !vertical ? 'tree' : 'flow');
+    setCollapsed(vertical ? new Set() : defaultCollapsed(gen.games.length));
+  }, [gen, vertical]);
 
   const effectiveMode: Mode = treeAllowed ? mode : 'flow';
 
   const { nodes, edges, focus } = useMemo(
-    () => (effectiveMode === 'tree' ? buildTree(gen, picks) : buildFlow(gen, picks, collapsed)),
-    [effectiveMode, gen, picks, collapsed],
+    () => (effectiveMode === 'tree' ? buildTree(gen, picks) : buildFlow(gen, picks, collapsed, vertical)),
+    [effectiveMode, gen, picks, collapsed, vertical],
   );
 
   const toggleColumn = (g: number) =>
@@ -153,7 +191,7 @@ export function GraphView({ gen, picks, onSelect, dark }: Props) {
   };
 
   // Re-fit only when the structure changes, not when the highlighted path changes.
-  const fitKey = `${effectiveMode}|${gen.total}|${n}|${gen.elapsedMs}|${[...collapsed].join(',')}`;
+  const fitKey = `${vertical ? 'v' : 'h'}|${effectiveMode}|${gen.total}|${n}|${gen.elapsedMs}|${[...collapsed].join(',')}`;
 
   return (
     <div className="flex h-full flex-col">
@@ -163,31 +201,33 @@ export function GraphView({ gen, picks, onSelect, dark }: Props) {
             type="button"
             disabled={!treeAllowed}
             onClick={() => setMode('tree')}
-            className={`rounded-md px-2.5 py-1 font-medium ${effectiveMode === 'tree' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300'} disabled:opacity-40`}
+            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'tree' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300'} disabled:opacity-40`}
             title={treeAllowed ? 'Every path drawn as its own branch' : `Tree view is limited to ${TREE_LIMIT} combinations`}
           >
-            Decision tree
+            <span className="sm:hidden">Tree</span>
+            <span className="hidden sm:inline">Decision tree</span>
           </button>
           <button
             type="button"
             onClick={() => setMode('flow')}
-            className={`rounded-md px-2.5 py-1 font-medium ${effectiveMode === 'flow' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300'}`}
+            className={`rounded-md px-2.5 py-1.5 font-medium sm:py-1 ${effectiveMode === 'flow' ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300'}`}
             title="Compact layered flow — scales to any number of games"
           >
-            Layered flow
+            <span className="sm:hidden">Flow</span>
+            <span className="hidden sm:inline">Layered flow</span>
           </button>
         </div>
         {effectiveMode === 'flow' && n > 1 && (
           <>
             <Button size="sm" variant="ghost" onClick={() => setCollapsed(new Set())}>
-              Expand all
+              Expand<span className="hidden sm:inline">all</span>
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setCollapsed(new Set(Array.from({ length: n }, (_, i) => i)))}>
-              Collapse all
+              Collapse<span className="hidden sm:inline">all</span>
             </Button>
           </>
         )}
-        <span className="ml-auto text-slate-500 dark:text-slate-400">
+        <span className="ml-auto hidden text-slate-500 md:inline dark:text-slate-400">
           {effectiveMode === 'tree'
             ? `${gen.total.toLocaleString()} leaves = ${gen.total.toLocaleString()} slips · click a node to pick its path`
             : 'Each left→right path is one slip · click outcomes to build a path · click headers to collapse'}
@@ -233,7 +273,8 @@ function gameTitle(gen: Generated, g: number) {
 const pathEdgeStyle = (o: Outcome) => ({ stroke: OUTCOME_STYLES[o].hex, strokeWidth: 3 });
 
 /** Layered DAG: one column per game, every outcome connected to every outcome of the next game. */
-function buildFlow(gen: Generated, picks: Outcome[], collapsed: Set<number>) {
+function buildFlow(gen: Generated, picks: Outcome[], collapsed: Set<number>, vertical = false) {
+  if (vertical) return buildVerticalFlow(gen, picks, collapsed);
   const n = gen.games.length;
   const nodes: FlowNode[] = [];
   const edges: Edge[] = [];
@@ -318,6 +359,91 @@ function buildFlow(gen: Generated, picks: Outcome[], collapsed: Set<number>) {
   // With many columns, open on the first few so the nodes stay readable; pan/zoom for the rest.
   const FOCUS_X = 140 + 5 * COL_W;
   const focus = x > FOCUS_X + COL_W ? nodes.filter((nd) => nd.position.x < FOCUS_X).map((nd) => ({ id: nd.id })) : undefined;
+  return { nodes, edges, focus };
+}
+
+/** Phone layout of the layered flow: games stacked top-to-bottom, outcomes side by side. */
+function buildVerticalFlow(gen: Generated, picks: Outcome[], collapsed: Set<number>) {
+  const n = gen.games.length;
+  const nodes: FlowNode[] = [];
+  const edges: Edge[] = [];
+  const COL_W = 124;
+  const ROW_H = 118;
+  const WIDTH = 3 * COL_W - 12;
+  const TOP = 64;
+
+  nodes.push({ id: 'start', type: 'start', position: { x: WIDTH / 2 - 48, y: 0 }, data: { kind: 'start', title: 'Slip', vertical: true } });
+  let prevIds: { id: string; onPath: boolean }[] = [{ id: 'start', onPath: true }];
+
+  for (let g = 0; g < n; g++) {
+    const act = gen.activeByGame[g];
+    const isCollapsed = collapsed.has(g);
+    const rowY = TOP + g * ROW_H;
+    nodes.push({
+      id: `h-${g}`,
+      type: 'header',
+      position: { x: -24, y: rowY },
+      data: {
+        kind: 'header',
+        game: g,
+        title: `Game ${g + 1}`,
+        subtitle: gameTitle(gen, g),
+        collapsed: isCollapsed,
+        canCollapse: n > 1,
+        vertical: true,
+      },
+    });
+    let current: { id: string; outcome?: Outcome; onPath: boolean }[];
+    if (isCollapsed) {
+      const id = `c-${g}`;
+      nodes.push({
+        id,
+        type: 'collapsed',
+        position: { x: WIDTH / 2 - 56, y: rowY + 34 },
+        data: { kind: 'collapsed', game: g, title: `G${g + 1}`, count: act.length, onPath: true, pick: OUTCOME_SYMBOL[picks[g]], vertical: true },
+      });
+      current = [{ id, onPath: true }];
+    } else {
+      const offset = ((3 - act.length) * COL_W) / 2;
+      current = act.map((o, i) => {
+        const id = `n-${g}-${o}`;
+        const onPath = picks[g] === o;
+        nodes.push({
+          id,
+          type: 'outcome',
+          position: { x: offset + i * COL_W, y: rowY + 34 },
+          data: {
+            kind: 'outcome',
+            outcome: o,
+            game: g,
+            title: o === 1 ? 'Draw' : (o === 0 ? gen.games[g].home || 'Home' : gen.games[g].away || 'Away'),
+            subtitle: `${(gen.probs[g][o] * 100).toFixed(1)}%`,
+            onPath,
+            compact: false,
+            vertical: true,
+          },
+        });
+        return { id, outcome: o, onPath };
+      });
+    }
+    for (const p of prevIds) {
+      for (const c of current) {
+        const hot = p.onPath && c.onPath;
+        const color = c.outcome ?? picks[g];
+        edges.push({
+          id: `${p.id}>${c.id}`,
+          source: p.id,
+          target: c.id,
+          animated: hot,
+          zIndex: hot ? 10 : 0,
+          style: hot ? pathEdgeStyle(color) : { strokeWidth: 1, opacity: 0.5 },
+        });
+      }
+    }
+    prevIds = current;
+  }
+  // Open on the first few games at a readable zoom; scroll/pan down for the rest.
+  const focus = n > 4 ? nodes.filter((nd) => nd.position.y < TOP + 4 * ROW_H).map((nd) => ({ id: nd.id })) : undefined;
   return { nodes, edges, focus };
 }
 

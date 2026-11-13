@@ -53,10 +53,10 @@ export function GameSidebar({ games, onChange, onAdd, onLoadSample, onClear }: P
       </div>
 
       <div className="flex gap-2 border-t border-slate-200 p-3 dark:border-slate-800">
-        <Button variant="primary" className="flex-1" onClick={() => onAdd(1)}>
+        <Button variant="secondary" className="flex-1 !h-11 sm:!h-9 lg:!bg-indigo-600 lg:!text-white lg:hover:!bg-indigo-500 lg:!border-transparent" onClick={() => onAdd(1)}>
           <Icon d={ICONS.plus} /> Add game
         </Button>
-        <Button onClick={() => onAdd(5)} title="Add 5 empty games">
+        <Button className="!h-11 sm:!h-9" onClick={() => onAdd(5)} title="Add 5 empty games">
           +5
         </Button>
       </div>
@@ -95,7 +95,7 @@ function GameCard({
   };
 
   const inputCls =
-    'h-8 w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 text-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-950';
+    'h-10 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2.5 text-base sm:h-8 sm:rounded-md sm:px-2 sm:text-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-950';
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -107,7 +107,7 @@ function GameCard({
         <button
           type="button"
           onClick={onRemove}
-          className="rounded-md p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50"
+          className="-m-1 rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50"
           aria-label={`Remove game ${index + 1}`}
         >
           <Icon d={ICONS.trash} className="size-3.5" />
@@ -140,7 +140,7 @@ function GameCard({
               onClick={() => toggle(o)}
               aria-pressed={on}
               title={`${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
-              className={`flex h-8 flex-1 items-center justify-center gap-1 rounded-md border text-xs font-semibold transition-colors ${
+              className={`flex h-10 flex-1 items-center justify-center gap-1 rounded-lg border text-sm font-semibold sm:h-8 sm:rounded-md sm:text-xs transition-colors ${
                 on
                   ? OUTCOME_STYLES[o].solid
                   : 'border-slate-300 bg-transparent text-slate-400 line-through dark:border-slate-700 dark:text-slate-500'
@@ -154,7 +154,7 @@ function GameCard({
         <button
           type="button"
           onClick={() => setShowWeights((s) => !s)}
-          className={`flex size-8 shrink-0 items-center justify-center rounded-md border ${
+          className={`flex size-10 shrink-0 items-center justify-center rounded-lg border sm:size-8 sm:rounded-md ${
             customWeights
               ? 'border-indigo-400 text-indigo-600 dark:text-indigo-300'
               : 'border-slate-300 text-slate-500 dark:border-slate-700'

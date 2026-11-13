@@ -14,18 +14,27 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatPct, pickLabel, slipString } from '../lib/combinatorics';
 import type { Generated, Outcome } from '../lib/types';
 import { OUTCOME_SYMBOL } from '../lib/types';
-import { Button, Icon, ICONS, OutcomePill } from './ui';
+import { Button, Icon, ICONS, OUTCOME_STYLES, OutcomePill, SlipChips } from './ui';
 
 interface Props {
   gen: Generated;
   selectedRow: number;
   onSelectRow: (row: number) => void;
   onToast: (msg: string) => void;
+  /** Phone layout: card rows + a filter/sort sheet instead of a wide table. */
+  compact?: boolean;
 }
 
-const ROW_H = 36;
+const SORT_OPTIONS = [
+  { id: 'default', label: 'Combination #', sorting: [] as SortingState },
+  { id: 'prob-desc', label: 'Most likely first', sorting: [{ id: 'prob', desc: true }] },
+  { id: 'prob-asc', label: 'Least likely first', sorting: [{ id: 'prob', desc: false }] },
+  { id: 'idx-desc', label: 'Combination # (reverse)', sorting: [{ id: 'idx', desc: true }] },
+];
 
-export function TableView({ gen, selectedRow, onSelectRow, onToast }: Props) {
+export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = false }: Props) {
+  const ROW_H = compact ? 64 : 36;
+  const [showFilters, setShowFilters] = useState(false);
   const n = gen.games.length;
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -164,42 +173,183 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast }: Props) {
 
   const filtersActive = columnFilters.length > 0 || globalFilter.length > 0;
   const totalWidth = table.getTotalSize();
+  const sortId =
+    SORT_OPTIONS.find((o) => JSON.stringify(o.sorting) === JSON.stringify(sorting))?.id ?? 'custom';
+  const clearFilters = () => {
+    setColumnFilters([]);
+    setSearch('');
+  };
+
+  const toolbar = (
+    <div className="border-b border-slate-200 px-3 py-2 dark:border-slate-800">
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="relative min-w-0 flex-1 basis-48">
+          <Icon d={ICONS.search} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={compact ? 'Search team, 1-X-2, #57…' : 'Search: team, “1-X-2”, “draw”, #57…'}
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-8 pr-2 text-base focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:h-8 sm:text-sm dark:border-slate-700 dark:bg-slate-950"
+          />
+        </label>
+        {compact ? (
+          <>
+            <Button
+              variant={showFilters || columnFilters.length > 0 || sortId !== 'default' ? 'primary' : 'secondary'}
+              className="!h-10"
+              onClick={() => setShowFilters((v) => !v)}
+              aria-expanded={showFilters}
+            >
+              <Icon d={ICONS.sliders} className="size-4" />
+              Filter{columnFilters.length > 0 ? ` · ${columnFilters.length}` : ''}
+            </Button>
+            <Button className="!h-10 !px-2.5" onClick={exportCsv} disabled={rows.length === 0} aria-label="Export CSV" title="Export CSV">
+              <Icon d={ICONS.download} />
+            </Button>
+          </>
+        ) : (
+          <>
+            <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+              {rows.length.toLocaleString()} of {gen.total.toLocaleString()} rows
+            </span>
+            {filtersActive && (
+              <Button size="sm" variant="ghost" onClick={clearFilters}>
+                Clear filters
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" onClick={scrollToSelected}>
+              <Icon d={ICONS.target} className="size-3.5" /> Selected
+            </Button>
+            <Button size="sm" onClick={exportCsv} disabled={rows.length === 0}>
+              <Icon d={ICONS.download} className="size-3.5" /> Export CSV
+            </Button>
+          </>
+        )}
+      </div>
+      {compact && (
+        <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+          <span className="tabular-nums">
+            {rows.length.toLocaleString()} of {gen.total.toLocaleString()} slips
+          </span>
+          <div className="flex gap-3">
+            {filtersActive && (
+              <button type="button" className="font-medium text-indigo-600 dark:text-indigo-300" onClick={clearFilters}>
+                Clear
+              </button>
+            )}
+            <button type="button" className="font-medium text-indigo-600 dark:text-indigo-300" onClick={scrollToSelected}>
+              Go to selected
+            </button>
+          </div>
+        </div>
+      )}
+      {compact && showFilters && (
+        <div className="mt-2 max-h-[45vh] space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
+          <label className="block text-xs font-medium text-slate-600 dark:text-slate-300">
+            Sort by
+            <select
+              value={sortId}
+              onChange={(e) => setSorting(SORT_OPTIONS.find((o) => o.id === e.target.value)?.sorting ?? [])}
+              className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-2 text-base dark:border-slate-700 dark:bg-slate-950"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+              {sortId === 'custom' && <option value="custom">Custom</option>}
+            </select>
+          </label>
+          {gen.games.map((game, g) => {
+            const col = table.getColumn(`g${g}`);
+            const val = col?.getFilterValue() as number | undefined;
+            const opts: (Outcome | undefined)[] = [undefined, ...gen.activeByGame[g]];
+            return (
+              <div key={game.id}>
+                <div className="mb-1 truncate text-xs font-medium text-slate-600 dark:text-slate-300">
+                  G{g + 1} · {game.home || 'Home'} v {game.away || 'Away'}
+                </div>
+                <div className="flex gap-1">
+                  {opts.map((o) => {
+                    const on = val === o;
+                    return (
+                      <button
+                        key={o ?? 'all'}
+                        type="button"
+                        onClick={() => col?.setFilterValue(o)}
+                        aria-pressed={on}
+                        className={`h-9 flex-1 rounded-lg border text-sm font-semibold ${
+                          on
+                            ? o === undefined
+                              ? 'border-slate-800 bg-slate-800 text-white dark:border-slate-200 dark:bg-slate-200 dark:text-slate-900'
+                              : OUTCOME_STYLES[o].solid
+                            : 'border-slate-300 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300'
+                        }`}
+                      >
+                        {o === undefined ? 'All' : OUTCOME_SYMBOL[o]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          <Button variant="primary" className="w-full !h-10" onClick={() => setShowFilters(false)}>
+            Show {rows.length.toLocaleString()} slips
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <div className="flex h-full flex-col">
+        {toolbar}
+        <div ref={parentRef} className="relative min-h-0 flex-1 overflow-auto">
+          <ul className="relative" style={{ height: virtualizer.getTotalSize() }}>
+            {virtualizer.getVirtualItems().map((vi) => {
+              const row = rows[vi.index];
+              const r = row.original;
+              const selected = r === selectedRow;
+              return (
+                <li
+                  key={row.id}
+                  className="absolute inset-x-0 px-3 py-1"
+                  style={{ transform: `translateY(${vi.start}px)`, height: ROW_H }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onSelectRow(r)}
+                    aria-pressed={selected}
+                    className={`flex h-full w-full items-center gap-3 rounded-xl border px-3 text-left ${
+                      selected
+                        ? 'border-indigo-400 bg-indigo-50 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:bg-indigo-950/60'
+                        : 'border-slate-200 bg-white active:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:active:bg-slate-800'
+                    }`}
+                  >
+                    <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400">
+                      #{(r + 1).toLocaleString()}
+                    </span>
+                    <SlipChips picks={gen.codes.subarray(r * n, r * n + n)} className="min-w-0 flex-1" />
+                    <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">{formatPct(gen.rowProb[r])}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {rows.length === 0 && (
+            <div className="p-10 text-center text-sm text-slate-500 dark:text-slate-400">No slips match these filters.</div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-2 dark:border-slate-800">
-        <label className="relative min-w-0 flex-1 basis-56">
-          <Icon d={ICONS.search} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search: team, “1-X-2”, “draw”, #57…"
-            className="h-8 w-full rounded-lg border border-slate-300 bg-white pl-8 pr-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-950"
-          />
-        </label>
-        <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-          {rows.length.toLocaleString()} of {gen.total.toLocaleString()} rows
-        </span>
-        {filtersActive && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              setColumnFilters([]);
-              setSearch('');
-            }}
-          >
-            Clear filters
-          </Button>
-        )}
-        <Button size="sm" variant="ghost" onClick={scrollToSelected}>
-          <Icon d={ICONS.target} className="size-3.5" /> Selected
-        </Button>
-        <Button size="sm" onClick={exportCsv} disabled={rows.length === 0}>
-          <Icon d={ICONS.download} className="size-3.5" /> Export CSV
-        </Button>
-      </div>
-
+      {toolbar}
       <div ref={parentRef} className="relative min-h-0 flex-1 overflow-auto">
         <table className="grid text-sm" style={{ width: totalWidth, minWidth: '100%' }}>
           <thead className="sticky top-0 z-10 grid bg-slate-100 dark:bg-slate-900">
