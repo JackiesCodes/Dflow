@@ -24,13 +24,28 @@ export function countCombinations(games: Game[]): number {
   return total;
 }
 
-/** Normalised probabilities over active outcomes (equal if all weights are 0). */
+export function validOdds(x: number | null | undefined): x is number {
+  return typeof x === 'number' && Number.isFinite(x) && x > 1;
+}
+
+/** True when every active outcome of the game has odds entered. */
+export function gameHasOdds(game: Game): boolean {
+  return activeOutcomes(game).every((o) => validOdds(game.odds?.[o]));
+}
+
+/**
+ * Normalised probabilities over active outcomes. When odds are entered they set the
+ * probabilities (implied 1/odds, rescaled to remove the bookmaker margin); otherwise
+ * the custom weights do (equal if all weights are 0).
+ */
 export function normalisedProbs(game: Game): number[] {
   const act = activeOutcomes(game);
-  const sum = act.reduce<number>((s, o) => s + Math.max(0, game.weights[o] || 0), 0);
+  const useOdds = gameHasOdds(game);
+  const w = (o: Outcome) => (useOdds ? 1 / (game.odds![o] as number) : Math.max(0, game.weights[o] || 0));
+  const sum = act.reduce<number>((s, o) => s + w(o), 0);
   return OUTCOMES.map((o) => {
     if (!act.includes(o)) return 0;
-    return sum > 0 ? Math.max(0, game.weights[o] || 0) / sum : 1 / act.length;
+    return sum > 0 ? w(o) / sum : 1 / act.length;
   });
 }
 
@@ -49,17 +64,22 @@ export function generate(games: Game[]): Generated {
   }
   const codes = new Uint8Array(total * n);
   const rowProb = new Float64Array(total);
+  const rowOdds = new Float64Array(total);
+  const oddsByGame = games.map((g) => OUTCOMES.map((o) => (validOdds(g.odds?.[o]) ? (g.odds![o] as number) : NaN)));
   // Odometer-style iteration: increment the last digit and carry left.
   const digits = new Array<number>(n).fill(0);
   for (let r = 0; r < total; r++) {
     let p = 1;
+    let odds = 1;
     const base = r * n;
     for (let g = 0; g < n; g++) {
       const o = activeByGame[g][digits[g]];
       codes[base + g] = o;
       p *= probs[g][o];
+      odds *= oddsByGame[g][o];
     }
     rowProb[r] = p;
+    rowOdds[r] = odds;
     for (let g = n - 1; g >= 0; g--) {
       if (++digits[g] < activeByGame[g].length) break;
       digits[g] = 0;
@@ -72,6 +92,8 @@ export function generate(games: Game[]): Generated {
     total,
     codes,
     rowProb,
+    rowOdds,
+    hasOdds: n > 0 && games.every(gameHasOdds),
     elapsedMs: performance.now() - t0,
   };
 }
@@ -149,4 +171,46 @@ export function formatOneIn(p: number): string {
   if (p <= 0) return '—';
   const x = 1 / p;
   return `1 in ${x >= 100 ? Math.round(x).toLocaleString() : x.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+}
+
+/**
+ * Money for the selected slip. Every slip stakes the whole balance, so a slip
+ * returns balance × its total odds if all its picks come in.
+ */
+export function moneySummary(gen: Generated, balance: number, row: number) {
+  const odds = row >= 0 ? gen.rowOdds[row] : NaN;
+  const ret = balance * odds;
+  const chance = row >= 0 ? gen.rowProb[row] : 0;
+  let minRet = Infinity;
+  let maxRet = 0;
+  for (let r = 0; r < gen.total; r++) {
+    const x = balance * gen.rowOdds[r];
+    if (x < minRet) minRet = x;
+    if (x > maxRet) maxRet = x;
+  }
+  return {
+    stake: balance,
+    odds,
+    ret,
+    profit: ret - balance,
+    chance,
+    /** Average outcome of this one bet: chance × return. */
+    expected: chance * ret,
+    minRet,
+    maxRet,
+    /** What it would cost to place every slip at the full balance. */
+    totalCost: balance * gen.total,
+  };
+}
+
+/** US-dollar amount, e.g. $3,187.00 or −$12.50. */
+export function formatMoney(x: number): string {
+  if (!Number.isFinite(x)) return '—';
+  const abs = Math.abs(x).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${x < 0 ? '−' : ''}$${abs}`;
+}
+
+export function formatOdds(x: number): string {
+  if (!Number.isFinite(x)) return '—';
+  return x >= 1000 ? Math.round(x).toLocaleString() : x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }

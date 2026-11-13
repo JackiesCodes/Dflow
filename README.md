@@ -13,6 +13,7 @@ Five sample fixtures are preloaded, so it opens on the 3⁵ = **243-combination*
   - *Team shield*: that team won't lose. Every slip includes their win or the draw, never the loss, so the game goes from 3 outcomes to 2.
   - *Draw shield*: the game ends level. Every slip has the draw for that game.
   - Tapping an active shield again restores your previous picks.
+- **Odds and betting balance.** Each game has an **Odds** dropdown for decimal odds on 1 / X / 2. Once a game has odds, they also set its probabilities (implied by the odds, with the bookmaker margin removed). Enter a betting balance in dollars, and every slip stakes that full amount. Each slip then shows its total odds and its return (balance × total odds), and the Odds panel shows the selected slip's return, profit, win chance, expected return and the range of returns across all slips. The sample games come with example odds.
 - **Full Cartesian product**, generated in a compact typed array. 3¹⁰ = 59,049 rows takes milliseconds. You get a warning above 100,000 combinations, and the hard limit is 1,000,000.
 - **Graph view** (React Flow), with pan, zoom and fit:
   - *Decision tree*: every slip is its own left-to-right branch, one leaf per combination. Used for up to 729 combinations.

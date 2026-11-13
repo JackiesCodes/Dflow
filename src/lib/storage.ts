@@ -12,16 +12,16 @@ export function makeGame(home = '', away = ''): Game {
   return { id: newId(), home, away, active: [true, true, true], weights: [1, 1, 1] };
 }
 
-export const SAMPLE_GAMES: [string, string][] = [
-  ['Arsenal', 'Chelsea'],
-  ['Real Madrid', 'Barcelona'],
-  ['Bayern Munich', 'Borussia Dortmund'],
-  ['Inter Milan', 'AC Milan'],
-  ['PSG', 'Marseille'],
+export const SAMPLE_GAMES: [string, string, [number, number, number]][] = [
+  ['Arsenal', 'Chelsea', [2.1, 3.4, 3.5]],
+  ['Real Madrid', 'Barcelona', [2.6, 3.6, 2.55]],
+  ['Bayern Munich', 'Borussia Dortmund', [1.75, 4.0, 4.2]],
+  ['Inter Milan', 'AC Milan', [2.3, 3.2, 3.1]],
+  ['PSG', 'Marseille', [1.45, 4.5, 6.5]],
 ];
 
 export function sampleGames(): Game[] {
-  return SAMPLE_GAMES.map(([h, a]) => makeGame(h, a));
+  return SAMPLE_GAMES.map(([h, a, odds]) => ({ ...makeGame(h, a), odds }));
 }
 
 function isGame(x: unknown): x is Game {

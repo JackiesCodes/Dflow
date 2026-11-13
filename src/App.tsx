@@ -6,6 +6,8 @@ import {
   WARN_THRESHOLD,
   countCombinations,
   formatBig,
+  formatMoney,
+  formatOdds,
   formatPct,
   generate,
   pickLabel,
@@ -56,6 +58,11 @@ export default function App() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [confirmLarge, setConfirmLarge] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [balance, setBalance] = useState<number>(() => {
+    const v = Number(loadPref('balance'));
+    return Number.isFinite(v) && v > 0 ? v : 100;
+  });
+  useEffect(() => savePref('balance', String(balance)), [balance]);
   const desktop = useMediaQuery('(min-width: 1024px)');
   const wide = useMediaQuery('(min-width: 1280px)');
   const toastId = useRef(0);
@@ -152,6 +159,9 @@ export default function App() {
       onAdd={(count = 1) => setGames((g) => [...g, ...Array.from({ length: count }, () => makeGame())])}
       onLoadSample={() => setGames(sampleGames())}
       onClear={() => setGames([])}
+      balance={balance}
+      onBalanceChange={setBalance}
+      totalSlips={Number.isFinite(total) ? total : 0}
     />
   );
 
@@ -196,6 +206,7 @@ export default function App() {
     content = (
       <TableView
         gen={gen}
+        balance={balance}
         compact={!desktop}
         selectedRow={selectedRow}
         onSelectRow={(r) => setPicks(rowPicks(gen, r))}
@@ -205,7 +216,7 @@ export default function App() {
   } else {
     content = (
       <div className="h-full overflow-y-auto">
-        <ProbabilityPanel gen={gen} picks={picks} />
+        <ProbabilityPanel gen={gen} picks={picks} balance={balance} />
       </div>
     );
   }
@@ -303,7 +314,7 @@ export default function App() {
             ))}
           </div>
 
-          {hasSlip && view !== 'games' && <SlipBar gen={gen} picks={picks} row={selectedRow} onRandom={randomSlip} />}
+          {hasSlip && view !== 'games' && <SlipBar gen={gen} picks={picks} row={selectedRow} balance={balance} onRandom={randomSlip} />}
 
           <div className={`min-h-0 flex-1 ${view === 'games' ? 'bg-ink-50 dark:bg-ink-950' : 'bg-white dark:bg-ink-950'}`}>{content}</div>
         </main>
@@ -313,9 +324,9 @@ export default function App() {
           <aside className="hidden w-[340px] shrink-0 overflow-y-auto border-l border-ink-200 bg-ink-50 xl:block dark:border-ink-800 dark:bg-ink-900/50">
             <div className="border-b border-ink-200 px-4 py-3 dark:border-ink-800">
               <h2 className="text-sm font-semibold">Probability</h2>
-              <p className="text-xs text-ink-500 dark:text-ink-400">Equal odds unless you set custom weights</p>
+              <p className="text-xs text-ink-500 dark:text-ink-400">From your odds, or equal unless you set weights</p>
             </div>
-            <ProbabilityPanel gen={gen} picks={picks} />
+            <ProbabilityPanel gen={gen} picks={picks} balance={balance} />
           </aside>
         )}
       </div>
@@ -418,13 +429,30 @@ export default function App() {
   );
 }
 
-function SlipBar({ gen, picks, row, onRandom }: { gen: Generated; picks: Outcome[]; row: number; onRandom: () => void }) {
+function SlipBar({
+  gen,
+  picks,
+  row,
+  balance,
+  onRandom,
+}: {
+  gen: Generated;
+  picks: Outcome[];
+  row: number;
+  balance: number;
+  onRandom: () => void;
+}) {
   const shown = picks.slice(0, 12);
+  const odds = gen.rowOdds[row];
+  const ret = balance * odds;
+  const money = gen.hasOdds && Number.isFinite(odds);
   return (
     <div className="flex items-center gap-2 border-b border-ink-200 bg-brand-50/70 px-3 py-1.5 text-xs dark:border-ink-800 dark:bg-brand-950/30">
       <div className="flex shrink-0 flex-col leading-tight lg:flex-row lg:items-center lg:gap-2">
         <span className="font-semibold text-ink-900 dark:text-white">Slip #{(row + 1).toLocaleString()}</span>
-        <span className="tabular-nums text-ink-500 lg:hidden dark:text-ink-400">{formatPct(gen.rowProb[row] ?? 0)}</span>
+        <span className="tabular-nums text-ink-500 lg:hidden dark:text-ink-400">
+          {money ? `@ ${formatOdds(odds)}` : formatPct(gen.rowProb[row] ?? 0)}
+        </span>
       </div>
       {/* Phones: compact coloured chips. Desktop: full pick names. */}
       <SlipChips picks={picks} className="min-w-0 flex-1 lg:hidden" />
@@ -434,7 +462,18 @@ function SlipBar({ gen, picks, row, onRandom }: { gen: Generated; picks: Outcome
         ))}
         {picks.length > shown.length && <span className="shrink-0 text-ink-500">+{picks.length - shown.length} more</span>}
       </div>
-      <span className="hidden shrink-0 tabular-nums text-ink-600 lg:inline dark:text-ink-300">P = {formatPct(gen.rowProb[row] ?? 0)}</span>
+      {money ? (
+        <span className="shrink-0 text-right leading-tight tabular-nums">
+          <span className="hidden text-ink-500 lg:inline dark:text-ink-400">Odds {formatOdds(odds)} · </span>
+          <span className="block text-[10px] text-ink-500 lg:hidden dark:text-ink-400">returns</span>
+          <span className="font-semibold text-brand-700 dark:text-brand-400">
+            <span className="hidden lg:inline">Returns </span>
+            {formatMoney(ret)}
+          </span>
+        </span>
+      ) : (
+        <span className="hidden shrink-0 tabular-nums text-ink-600 lg:inline dark:text-ink-300">P = {formatPct(gen.rowProb[row] ?? 0)}</span>
+      )}
       <Button size="sm" variant="ghost" className="!h-9 lg:!h-8" onClick={onRandom} title="Pick a random slip" aria-label="Pick a random slip">
         <Icon d={ICONS.shuffle} className="size-4 lg:size-3.5" />
         <span className="hidden sm:inline">Random</span>

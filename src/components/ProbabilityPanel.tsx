@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { correctPicksDistribution, formatOneIn, formatPct, pickLabel, rowIndexOf } from '../lib/combinatorics';
+import { correctPicksDistribution, formatMoney, formatOdds, formatOneIn, formatPct, moneySummary, pickLabel, rowIndexOf } from '../lib/combinatorics';
 import type { Generated, Outcome } from '../lib/types';
 import { OUTCOME_SYMBOL } from '../lib/types';
 import { OutcomePill } from './ui';
@@ -7,9 +7,10 @@ import { OutcomePill } from './ui';
 interface Props {
   gen: Generated;
   picks: Outcome[];
+  balance: number;
 }
 
-export function ProbabilityPanel({ gen, picks }: Props) {
+export function ProbabilityPanel({ gen, picks, balance }: Props) {
   const n = gen.games.length;
   const row = rowIndexOf(gen, picks);
   const slipProb = row >= 0 ? gen.rowProb[row] : 0;
@@ -24,8 +25,54 @@ export function ProbabilityPanel({ gen, picks }: Props) {
   const best = gen.probs.map((p, g) => gen.activeByGame[g].reduce((a, b) => (p[b] > p[a] ? b : a)));
   const bestProb = best.reduce<number>((acc, o, g) => acc * gen.probs[g][o], 1);
 
+  const money = useMemo(() => (gen.hasOdds ? moneySummary(gen, balance, row) : null), [gen, balance, row]);
+
   return (
     <div className="space-y-4 p-4 text-sm">
+      {money ? (
+        <section>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">Your stake</h3>
+          <div className="rounded-xl bg-ink-900 p-3 text-white dark:bg-ink-800">
+            <div className="flex items-baseline justify-between gap-2 text-xs text-ink-300">
+              <span>
+                {formatMoney(balance)} on slip #{(row + 1).toLocaleString()}
+              </span>
+              <span className="tabular-nums">odds {formatOdds(money.odds)}</span>
+            </div>
+            <div className="mt-2 text-xs text-ink-300">If it wins</div>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+              <span className="text-2xl font-bold tabular-nums">{formatMoney(money.ret)}</span>
+              <span className="text-sm font-semibold tabular-nums text-brand-400">+{formatMoney(money.profit)} profit</span>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-white/10 pt-2 text-[11px] text-ink-300">
+              <div>
+                <div>Win chance</div>
+                <div className="text-sm font-semibold tabular-nums text-white">{formatPct(money.chance)}</div>
+              </div>
+              <div>
+                <div>Expected return</div>
+                <div className={`text-sm font-semibold tabular-nums ${money.expected >= balance ? 'text-brand-400' : 'text-flame-400'}`}>
+                  {formatMoney(money.expected)}
+                </div>
+              </div>
+              <div className="col-span-2">
+                <div>Returns across all {gen.total.toLocaleString()} slips</div>
+                <div className="text-sm font-semibold tabular-nums text-white">
+                  {formatMoney(money.minRet)} – {formatMoney(money.maxRet)}
+                </div>
+              </div>
+            </div>
+            <p className="mt-2 border-t border-white/10 pt-2 text-[11px] text-ink-400">
+              Each slip stakes your full balance. Placing all {gen.total.toLocaleString()} slips would stake {formatMoney(money.totalCost)}.
+            </p>
+          </div>
+        </section>
+      ) : (
+        <section className="rounded-xl border border-dashed border-ink-300 p-3 text-xs text-ink-500 dark:border-ink-700 dark:text-ink-400">
+          Add odds to every game (Games → Odds) to see what a {formatMoney(balance)} stake returns.
+        </section>
+      )}
+
       <section>
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">Selected slip</h3>
         <div className="rounded-xl border border-brand-200 bg-brand-50 p-3 dark:border-brand-900 dark:bg-brand-950/50">
@@ -41,7 +88,9 @@ export function ProbabilityPanel({ gen, picks }: Props) {
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
                 <OutcomePill outcome={picks[g]} label={`${OUTCOME_SYMBOL[picks[g]]} ${pickLabel(game, picks[g])}`} />
-                <span className="w-11 text-right tabular-nums text-ink-500">{(gen.probs[g][picks[g]] * 100).toFixed(1)}%</span>
+                <span className="w-11 text-right tabular-nums text-ink-500">
+                  {gen.hasOdds ? `@${formatOdds(game.odds?.[picks[g]] ?? NaN)}` : `${(gen.probs[g][picks[g]] * 100).toFixed(1)}%`}
+                </span>
               </span>
             </li>
           ))}

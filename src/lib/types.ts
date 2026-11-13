@@ -21,6 +21,8 @@ export interface Game {
    * `active` is kept untouched so removing the badge restores the previous selection.
    */
   trusted?: Outcome | null;
+  /** Decimal odds for 1 / X / 2 (null = not entered). */
+  odds?: [number | null, number | null, number | null];
 }
 
 /** Immutable snapshot of games used to produce a result set. */
@@ -35,5 +37,9 @@ export interface Generated {
   codes: Uint8Array;
   /** Probability of each combination (Float64Array, same row order). */
   rowProb: Float64Array;
+  /** Combined decimal odds of each slip (NaN when a pick has no odds). */
+  rowOdds: Float64Array;
+  /** True when every active outcome of every game has odds. */
+  hasOdds: boolean;
   elapsedMs: number;
 }

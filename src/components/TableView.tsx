@@ -11,7 +11,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { formatPct, pickLabel, slipString } from '../lib/combinatorics';
+import { formatMoney, formatOdds, formatPct, pickLabel, slipString } from '../lib/combinatorics';
 import type { Generated, Outcome } from '../lib/types';
 import { OUTCOME_SYMBOL } from '../lib/types';
 import { Button, Icon, ICONS, OUTCOME_STYLES, OutcomePill, SlipChips } from './ui';
@@ -21,6 +21,7 @@ interface Props {
   selectedRow: number;
   onSelectRow: (row: number) => void;
   onToast: (msg: string) => void;
+  balance: number;
   /** Phone layout: card rows + a filter/sort sheet instead of a wide table. */
   compact?: boolean;
 }
@@ -30,9 +31,12 @@ const SORT_OPTIONS = [
   { id: 'prob-desc', label: 'Most likely first', sorting: [{ id: 'prob', desc: true }] },
   { id: 'prob-asc', label: 'Least likely first', sorting: [{ id: 'prob', desc: false }] },
   { id: 'idx-desc', label: 'Combination # (reverse)', sorting: [{ id: 'idx', desc: true }] },
+  { id: 'ret-desc', label: 'Biggest return first', sorting: [{ id: 'ret', desc: true }] },
 ];
 
-export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = false }: Props) {
+export function TableView({ gen, selectedRow, onSelectRow, onToast, balance, compact = false }: Props) {
+  // Every slip stakes the whole balance.
+  const stake = balance;
   const ROW_H = compact ? 64 : 36;
   const [showFilters, setShowFilters] = useState(false);
   const n = gen.games.length;
@@ -102,8 +106,37 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
         cell: (c) => <span className="tabular-nums">{formatPct(c.getValue<number>())}</span>,
       },
     );
+    if (gen.hasOdds) {
+      cols.push(
+        {
+          id: 'odds',
+          header: 'Total odds',
+          accessorFn: (r) => gen.rowOdds[r],
+          size: 100,
+          enableColumnFilter: false,
+          sortDescFirst: true,
+          cell: (c) => <span className="tabular-nums">{formatOdds(c.getValue<number>())}</span>,
+        },
+        {
+          id: 'ret',
+          header: 'Returns',
+          accessorFn: (r) => gen.rowOdds[r] * stake,
+          size: 110,
+          enableColumnFilter: false,
+          sortDescFirst: true,
+          cell: (c) => {
+            const v = c.getValue<number>();
+            return (
+              <span className="font-semibold tabular-nums text-brand-700 dark:text-brand-400">
+                {formatMoney(v)}
+              </span>
+            );
+          },
+        },
+      );
+    }
     return cols;
-  }, [gen, n]);
+  }, [gen, n, stake, balance]);
 
   const globalFilterFn: FilterFn<number> = (row, _columnId, value: string) => {
     const r = row.original;
@@ -147,7 +180,13 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
 
   const exportCsv = () => {
     const esc = (s: string) => (/[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
-    const header = ['Combination #', ...gen.games.map((g, i) => `Game ${i + 1}: ${g.home} vs ${g.away}`), 'Full Slip', 'Probability'];
+    const header = [
+      'Combination #',
+      ...gen.games.map((g, i) => `Game ${i + 1}: ${g.home} vs ${g.away}`),
+      'Full Slip',
+      'Probability',
+      ...(gen.hasOdds ? ['Total Odds', `Returns (stake $${balance})`] : []),
+    ];
     const chunks: string[] = [header.map(esc).join(',')];
     for (const row of rows) {
       const r = row.original;
@@ -157,6 +196,7 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
         cells.push(esc(`${OUTCOME_SYMBOL[o]} (${pickLabel(gen.games[g], o)})`));
       }
       cells.push(slipString(gen.codes.subarray(r * n, r * n + n)), gen.rowProb[r].toPrecision(6));
+      if (gen.hasOdds) cells.push(gen.rowOdds[r].toFixed(2), (gen.rowOdds[r] * stake).toFixed(2));
       chunks.push(cells.join(','));
     }
     const blob = new Blob([chunks.join('\n')], { type: 'text/csv;charset=utf-8' });
@@ -333,7 +373,16 @@ export function TableView({ gen, selectedRow, onSelectRow, onToast, compact = fa
                       #{(r + 1).toLocaleString()}
                     </span>
                     <SlipChips picks={gen.codes.subarray(r * n, r * n + n)} className="min-w-0 flex-1" />
-                    <span className="shrink-0 text-xs tabular-nums text-ink-500 dark:text-ink-400">{formatPct(gen.rowProb[r])}</span>
+                    {gen.hasOdds ? (
+                      <span className="shrink-0 text-right leading-tight tabular-nums">
+                        <span className="block text-sm font-semibold text-brand-700 dark:text-brand-400">
+                          {formatMoney(gen.rowOdds[r] * stake)}
+                        </span>
+                        <span className="block text-[11px] text-ink-500 dark:text-ink-400">@ {formatOdds(gen.rowOdds[r])}</span>
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-xs tabular-nums text-ink-500 dark:text-ink-400">{formatPct(gen.rowProb[r])}</span>
+                    )}
                   </button>
                 </li>
               );

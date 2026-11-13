@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { correctPicksDistribution, countCombinations, generate, rowIndexOf, rowPicks, slipString } from './combinatorics';
-import { makeGame, sampleGames } from './storage';
+import {
+  correctPicksDistribution,
+  countCombinations,
+  formatMoney,
+  generate,
+  moneySummary,
+  normalisedProbs,
+  rowIndexOf,
+  rowPicks,
+  slipString,
+} from './combinatorics';
+import { makeGame, sampleGames as sampleGamesWithOdds } from './storage';
 import type { Game } from './types';
+
+/** The sample fixtures without odds, so every outcome is equally likely. */
+const sampleGames = (): Game[] => sampleGamesWithOdds().map((g) => ({ ...g, odds: undefined }));
 
 describe('combinations', () => {
   it('0 games → 0 combinations', () => {
@@ -89,5 +102,33 @@ describe('draw trust badge', () => {
     expect(gen.total).toBe(36); // 2 × 2 × 1 × 3 × 3
     for (let r = 0; r < gen.total; r++) expect(rowPicks(gen, r)[2]).toBe(1);
     expect(gen.probs[2]).toEqual([0, 1, 0]);
+  });
+});
+
+describe('odds and betting balance', () => {
+  it('multiplies odds into each slip and stakes the full balance on every slip', () => {
+    const gen = generate(sampleGamesWithOdds());
+    expect(gen.hasOdds).toBe(true);
+    expect(gen.rowOdds[0]).toBeCloseTo(2.1 * 2.6 * 1.75 * 2.3 * 1.45, 10); // 1-1-1-1-1
+    const m = moneySummary(gen, 100, 0);
+    expect(m.stake).toBe(100);
+    expect(m.ret).toBeCloseTo(100 * gen.rowOdds[0], 8);
+    expect(m.profit).toBeCloseTo(m.ret - 100, 8);
+    expect(m.totalCost).toBe(100 * 243);
+    expect(m.maxRet).toBeCloseTo(100 * 3.5 * 3.6 * 4.2 * 3.2 * 6.5, 6); // 2-X-2-X-2
+  });
+
+  it('turns odds into probabilities with the bookmaker margin removed', () => {
+    const g: Game = { ...makeGame('A', 'B'), odds: [2, 4, 4] };
+    expect(normalisedProbs(g)).toEqual([0.5, 0.25, 0.25]);
+    // Missing odds fall back to the weights, and slips get no odds.
+    const partial: Game = { ...g, odds: [2, null, 4] };
+    expect(normalisedProbs(partial)).toEqual([1 / 3, 1 / 3, 1 / 3]);
+    expect(generate([partial]).hasOdds).toBe(false);
+  });
+
+  it('formats dollars', () => {
+    expect(formatMoney(3187)).toBe('$3,187.00');
+    expect(formatMoney(-12.5)).toBe('−$12.50');
   });
 });

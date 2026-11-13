@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { activeOutcomes, normalisedProbs } from '../lib/combinatorics';
+import { activeOutcomes, formatMoney, gameHasOdds, normalisedProbs, validOdds } from '../lib/combinatorics';
 import type { Game, Outcome } from '../lib/types';
 import { OUTCOMES, OUTCOME_NAME, OUTCOME_SYMBOL } from '../lib/types';
 import { Button, Icon, ICONS, OUTCOME_STYLES } from './ui';
@@ -10,9 +10,13 @@ interface Props {
   onAdd: (count?: number) => void;
   onLoadSample: () => void;
   onClear: () => void;
+  balance: number;
+  onBalanceChange: (balance: number) => void;
+  /** Total slips for the current inputs, used to show the stake per slip. */
+  totalSlips: number;
 }
 
-export function GameSidebar({ games, onChange, onAdd, onLoadSample, onClear }: Props) {
+export function GameSidebar({ games, onChange, onAdd, onLoadSample, onClear, balance, onBalanceChange, totalSlips }: Props) {
   const update = (id: string, patch: Partial<Game>) =>
     onChange(games.map((g) => (g.id === id ? { ...g, ...patch } : g)));
 
@@ -34,6 +38,8 @@ export function GameSidebar({ games, onChange, onAdd, onLoadSample, onClear }: P
           </Button>
         </div>
       </div>
+
+      <BalanceInput balance={balance} onChange={onBalanceChange} totalSlips={totalSlips} />
 
       <div className="flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
         {games.length === 0 && (
@@ -249,6 +255,122 @@ function GameCard({
               Reset to equal
             </button>
           )}
+        </div>
+      )}
+      <OddsDropdown game={game} probs={probs} onUpdate={onUpdate} inputCls={inputCls} />
+    </div>
+  );
+}
+
+/** Betting balance: every slip stakes this full amount. */
+function BalanceInput({ balance, onChange, totalSlips }: { balance: number; onChange: (b: number) => void; totalSlips: number }) {
+  return (
+    <div className="border-b border-ink-200 px-3 py-2.5 dark:border-ink-800">
+      <label className="flex items-center gap-2">
+        <span className="shrink-0 text-xs font-semibold text-ink-700 dark:text-ink-200">Betting balance</span>
+        <span className="relative min-w-0 flex-1">
+          <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-base font-semibold text-ink-400 sm:text-sm">$</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step="any"
+            value={Number.isFinite(balance) ? balance : ''}
+            onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+            className="h-10 w-full rounded-lg border border-ink-300 bg-white pl-6 pr-2.5 text-right text-base font-semibold tabular-nums focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/30 sm:h-8 sm:text-sm dark:border-ink-700 dark:bg-ink-950"
+            aria-label="Betting balance in dollars"
+          />
+        </span>
+      </label>
+      <p className="mt-1 text-right text-[11px] tabular-nums text-ink-500 dark:text-ink-400">
+        Each slip stakes the full <span className="font-semibold text-ink-800 dark:text-ink-100">{formatMoney(balance)}</span>
+        {totalSlips > 1 && <> · all {totalSlips.toLocaleString()} slips = {formatMoney(balance * totalSlips)}</>}
+      </p>
+    </div>
+  );
+}
+
+/** Collapsible odds row: a summary when closed, 1 / X / 2 inputs when open. */
+function OddsDropdown({
+  game,
+  probs,
+  onUpdate,
+  inputCls,
+}: {
+  game: Game;
+  probs: number[];
+  onUpdate: (patch: Partial<Game>) => void;
+  inputCls: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const odds = game.odds ?? [null, null, null];
+  const act = activeOutcomes(game);
+  const complete = gameHasOdds(game);
+  const anyOdds = odds.some((x) => validOdds(x));
+  const setOdd = (o: Outcome, v: string) => {
+    const next = [...odds] as NonNullable<Game['odds']>;
+    const n = Number(v);
+    next[o] = v === '' || !Number.isFinite(n) ? null : n;
+    onUpdate({ odds: next });
+  };
+  const label = (o: Outcome) => (o === 1 ? 'Draw' : o === 0 ? game.home || 'Home' : game.away || 'Away');
+  const ALL: Outcome[] = [0, 1, 2];
+
+  return (
+    <div className="mt-2 rounded-lg border border-ink-200 dark:border-ink-800">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex h-10 w-full items-center gap-2 px-2.5 text-left text-xs sm:h-8"
+      >
+        <span className="font-semibold text-ink-700 dark:text-ink-200">Odds</span>
+        <span className="min-w-0 flex-1 truncate tabular-nums text-ink-500 dark:text-ink-400">
+          {anyOdds
+            ? ALL.map((o) => `${OUTCOME_SYMBOL[o]} ${validOdds(odds[o]) ? (odds[o] as number).toFixed(2) : '–'}`).join('   ')
+            : 'Tap to add odds'}
+        </span>
+        {anyOdds && !complete && (
+          <span className="rounded bg-gold-100 px-1 text-[10px] font-semibold text-gold-800 dark:bg-gold-950 dark:text-gold-300">
+            incomplete
+          </span>
+        )}
+        <Icon d={ICONS.chevronDown} className={`size-4 shrink-0 text-ink-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="border-t border-ink-200 p-2 dark:border-ink-800">
+          <div className="grid grid-cols-3 gap-1.5">
+            {ALL.map((o) => {
+              const inSlips = act.includes(o);
+              return (
+                <label key={o} className={`min-w-0 text-[11px] ${inSlips ? '' : 'opacity-40'}`}>
+                  <span className="mb-0.5 flex items-center gap-1 font-medium text-ink-600 dark:text-ink-300">
+                    <span className={`inline-flex size-4 shrink-0 items-center justify-center rounded border text-[9px] font-bold ${OUTCOME_STYLES[o].solid}`}>
+                      {OUTCOME_SYMBOL[o]}
+                    </span>
+                    <span className="truncate">{label(o)}</span>
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={1.01}
+                    step="0.01"
+                    placeholder="2.10"
+                    className={`${inputCls} text-center tabular-nums`}
+                    value={odds[o] ?? ''}
+                    onChange={(e) => setOdd(o, e.target.value)}
+                    aria-label={`Odds for ${label(o)}`}
+                  />
+                  <span className="mt-0.5 block text-center tabular-nums text-ink-400">
+                    {complete && inSlips ? `${(probs[o] * 100).toFixed(0)}% chance` : ' '}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-[11px] text-ink-500 dark:text-ink-400">
+            Decimal odds. Once every included outcome has odds, they also set the probabilities.
+          </p>
         </div>
       )}
     </div>
