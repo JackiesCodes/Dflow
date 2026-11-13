@@ -5,7 +5,9 @@ export const WARN_THRESHOLD = 100_000;
 export const HARD_LIMIT = 1_000_000;
 
 export function activeOutcomes(game: Game): Outcome[] {
-  if (game.trusted === 0 || game.trusted === 2) return [game.trusted];
+  // Trusted team won't lose: their win or the draw, never the loss.
+  if (game.trusted === 0) return [0, 1];
+  if (game.trusted === 2) return [1, 2];
   return OUTCOMES.filter((o) => game.active[o]);
 }
 

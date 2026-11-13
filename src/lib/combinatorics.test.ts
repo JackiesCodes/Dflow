@@ -55,22 +55,26 @@ describe('combinations', () => {
 });
 
 describe('trust badge', () => {
-  it('locks the trusted win into every slip and restores on removal', () => {
+  it("keeps the trusted team's win or the draw, never the loss", () => {
     const games = sampleGames();
-    games[0] = { ...games[0], trusted: 0 }; // Arsenal
-    games[1] = { ...games[1], trusted: 2 }; // Barcelona
+    games[0] = { ...games[0], trusted: 0 }; // Arsenal (home) won't lose
+    games[1] = { ...games[1], trusted: 2 }; // Barcelona (away) won't lose
     const gen = generate(games);
-    expect(gen.total).toBe(27);
+    expect(gen.total).toBe(108); // 2 × 2 × 3 × 3 × 3
     for (let r = 0; r < gen.total; r++) {
       const p = rowPicks(gen, r);
-      expect(p[0]).toBe(0);
-      expect(p[1]).toBe(2);
+      expect(p[0]).not.toBe(2); // Arsenal never loses
+      expect(p[1]).not.toBe(0); // Barcelona never loses
     }
-    expect(gen.probs[0][0]).toBe(1);
-    expect(gen.rowProb[0]).toBeCloseTo(1 / 27, 12);
-    // Removing trust brings back the previously ticked outcomes.
-    const limited: Game = { ...games[2], active: [true, false, true], trusted: 0 };
-    expect(countCombinations([limited])).toBe(1);
-    expect(countCombinations([{ ...limited, trusted: null }])).toBe(2);
+    expect(gen.probs[0]).toEqual([0.5, 0.5, 0]);
+    expect(gen.rowProb[0]).toBeCloseTo(1 / 108, 12);
+  });
+
+  it('restores the previously ticked outcomes when removed', () => {
+    const g: Game = { ...makeGame(), active: [true, false, true] };
+    expect(countCombinations([{ ...g, trusted: 0 }])).toBe(2);
+    expect(countCombinations([{ ...g, trusted: null }])).toBe(2);
+    expect(generate([{ ...g, trusted: null }]).activeByGame[0]).toEqual([0, 2]);
+    expect(generate([{ ...g, trusted: 0 }]).activeByGame[0]).toEqual([0, 1]);
   });
 });

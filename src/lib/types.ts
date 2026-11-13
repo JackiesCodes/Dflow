@@ -15,8 +15,8 @@ export interface Game {
   /** Relative likelihood weights, indexed by Outcome. Only active outcomes count. */
   weights: [number, number, number];
   /**
-   * Trust badge: a team the user is sure will win. When set, that win is locked
-   * into every slip (the game contributes a single outcome). `active` is kept
+   * Trust badge: a team the user is sure won't lose. When set, every slip has
+   * that team's win or the draw (the loss is excluded). `active` is kept
    * untouched so removing the badge restores the previous selection.
    */
   trusted?: 0 | 2 | null;

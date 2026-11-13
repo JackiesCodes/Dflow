@@ -9,6 +9,7 @@ Five sample fixtures are preloaded, so it opens on the 3⁵ = **243-combination*
 ## Features
 
 - **Any number of games.** Each game has a home team, an away team and outcomes 1 / X / 2. You can untick outcomes per game, and the count becomes the product of the active outcomes (e.g. 3 × 2 × 3).
+- **Trust badge.** Tap the shield next to a team you're sure won't lose. Every slip then includes that team's win or the draw, never the loss: one trusted game goes from 3 outcomes to 2. Only one team per game can be trusted, and tapping the shield again restores your previous picks.
 - **Full Cartesian product**, generated in a compact typed array. 3¹⁰ = 59,049 rows takes milliseconds. You get a warning above 100,000 combinations, and the hard limit is 1,000,000.
 - **Graph view** (React Flow), with pan, zoom and fit:
   - *Decision tree*: every slip is its own left-to-right branch, one leaf per combination. Used for up to 729 combinations.

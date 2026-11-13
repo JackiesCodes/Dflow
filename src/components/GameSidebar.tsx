@@ -113,7 +113,7 @@ function GameCard({
           Game {index + 1}
           {trusted !== null ? (
             <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-brand-500 px-1.5 py-0.5 text-[10px] font-bold text-ink-950">
-              <Icon d={ICONS.lock} className="size-2.5" /> {trustedName} win in every slip
+              <Icon d={ICONS.shieldCheck} className="size-2.5" /> {trustedName} win or draw
             </span>
           ) : (
             <span className="ml-1.5 font-normal">· {activeCount} outcome{activeCount === 1 ? '' : 's'}</span>
@@ -147,7 +147,7 @@ function GameCard({
                 onClick={() => toggleTrust(side)}
                 aria-pressed={isTrusted}
                 aria-label={`${isTrusted ? 'Remove trust from' : 'Trust'} ${name || label}`}
-                title={isTrusted ? `Trusted: ${name || label} win is in every slip. Tap to remove.` : `Trust ${name || label} — lock their win into every slip`}
+                title={isTrusted ? `Trusted: ${name || label} won't lose (win or draw). Tap to remove.` : `Trust ${name || label} — they won't lose (win or draw in every slip)`}
                 className={`absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md transition-colors sm:size-6 ${
                   isTrusted
                     ? 'bg-brand-500 text-ink-950'
@@ -163,7 +163,7 @@ function GameCard({
       </div>
       <div className="mt-2 flex items-center gap-1.5">
         {OUTCOMES.map((o) => {
-          const on = trusted !== null ? trusted === o : game.active[o];
+          const on = trusted !== null ? o === 1 || o === trusted : game.active[o];
           const locked = trusted !== null;
           return (
             <button
@@ -172,7 +172,7 @@ function GameCard({
               onClick={() => toggle(o)}
               aria-pressed={on}
               aria-disabled={locked}
-              title={locked ? `Locked by the trust badge on ${trustedName}` : `${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
+              title={locked ? (on ? `Included: ${trustedName} is trusted not to lose` : `Excluded: ${trustedName} is trusted not to lose`) : `${OUTCOME_NAME[o]} — ${on ? 'included' : 'excluded'}`}
               className={`flex h-10 flex-1 items-center justify-center gap-1 rounded-lg border text-sm font-semibold sm:h-8 sm:rounded-md sm:text-xs transition-colors ${
                 on
                   ? OUTCOME_STYLES[o].solid
