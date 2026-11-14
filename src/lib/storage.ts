@@ -38,14 +38,15 @@ function isGame(x: unknown): x is Game {
 export function loadGames(): Game[] {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw === null) return sampleGames();
+    // First visit: start empty so the welcome guide shows (it offers the sample games).
+    if (raw === null) return [];
     const parsed = JSON.parse(raw);
     // Older saves carried per-outcome weights; those are no longer used.
     if (Array.isArray(parsed) && parsed.every(isGame)) return (parsed as (Game & { weights?: unknown })[]).map(({ weights: _w, ...g }) => g);
   } catch {
-    /* storage unavailable or corrupt: fall back to sample data */
+    /* storage unavailable or corrupt: start empty and show the welcome guide */
   }
-  return sampleGames();
+  return [];
 }
 
 export function saveGames(games: Game[]) {

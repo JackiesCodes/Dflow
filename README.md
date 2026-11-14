@@ -4,7 +4,7 @@
 
 A client-side web app that generates **every possible outcome combination** for N football games and shows them as an interactive workflow graph and a table.
 
-Five sample fixtures are preloaded, so it opens on the 3⁵ = **243-combination** graph.
+First-time visitors see a short welcome guide; one tap on **Try it with 5 sample games** loads five fixtures and opens their 3⁵ = **243-combination** graph.
 
 ## Features
 
