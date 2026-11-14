@@ -21,6 +21,7 @@ import { GameSidebar } from './components/GameSidebar';
 import { GraphView } from './components/GraphView';
 import { TableView } from './components/TableView';
 import { ProbabilityPanel } from './components/ProbabilityPanel';
+import { Welcome } from './components/Welcome';
 import { Button, Icon, ICONS, OutcomePill, SlipChips, Stat } from './components/ui';
 
 type Tab = 'games' | 'graph' | 'table' | 'prob';
@@ -187,20 +188,27 @@ export default function App() {
 
   const comboLabel = games.length === 0 ? '0' : formatBig(total);
   const comboTone = tooMany ? 'error' : total > WARN_THRESHOLD ? 'warn' : undefined;
-  const showMobileGenerate = !desktop && (view === 'games' || stale || !gen);
+  // While the welcome guide shows (no games yet), its own buttons lead the way.
+  const showMobileGenerate = !desktop && (view === 'games' || stale || (!gen && games.length > 0));
 
   let content: React.ReactNode;
   if (view === 'games') {
     content = sidebar;
   } else if (!gen) {
     content = (
-      <EmptyState
+      <Welcome
         hasGames={games.length > 0}
+        gameCount={games.length}
         onAdd={() => {
           setGames([makeGame()]);
           if (!desktop) setTab('games');
         }}
-        onSample={() => setGames(sampleGames())}
+        onSample={() => {
+          // Load the sample fixtures and show their slips straight away.
+          const sample = sampleGames();
+          setGames(sample);
+          runGenerate(sample, () => setTab('graph'));
+        }}
         onGenerate={onGenerate}
       />
     );
@@ -486,36 +494,6 @@ function SlipBar({
         <Icon d={ICONS.shuffle} className="size-4 lg:size-3.5" />
         <span className="hidden sm:inline">Random</span>
       </Button>
-    </div>
-  );
-}
-
-function EmptyState({ hasGames, onAdd, onSample, onGenerate }: { hasGames: boolean; onAdd: () => void; onSample: () => void; onGenerate: () => void }) {
-  return (
-    <div className="flex h-full items-center justify-center p-8">
-      <div className="max-w-sm text-center">
-        <div className="mx-auto mb-4 flex w-fit gap-2">
-          <span className="size-3 rounded-full bg-brand-500" />
-          <span className="size-3 rounded-full bg-white ring-1 ring-ink-400" />
-          <span className="size-3 rounded-full bg-ink-900 dark:ring-1 dark:ring-ink-400" />
-        </div>
-        <h2 className="text-lg font-semibold">{hasGames ? 'Ready when you are' : 'No games yet'}</h2>
-        <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-          {hasGames
-            ? 'Press Generate to build every combination of your games.'
-            : 'Add games, or load the five sample fixtures to see the 243-combination graph.'}
-        </p>
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {hasGames ? (
-            <Button variant="cta" onClick={onGenerate}>Generate</Button>
-          ) : (
-            <>
-              <Button variant="primary" onClick={onSample}>Load sample games</Button>
-              <Button onClick={onAdd}>Add a game</Button>
-            </>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

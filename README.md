@@ -22,6 +22,7 @@ Five sample fixtures are preloaded, so it opens on the 3⁵ = **243-combination*
   - Colours: green = home win, white = draw, black = away win. Click nodes to build or highlight a slip.
 - **Table view** (TanStack Table + TanStack Virtual): virtualised rows, sorting on every column, an outcome filter per game, global search (team, `1-X-2`, `draw`, `#57`), and CSV export of the filtered and sorted rows.
 - **Probability panel**: chances come from the odds you enter, or are equal for a game without odds. Shows the selected slip's chance of winning, the most likely slip, and how many results give **exactly K correct picks** with the chance of each.
+- **Welcome guide.** With no games, the main area shows a short guide to getting the most out of Dflow, with a one-tap "Try it with 5 sample games" button.
 - Light and dark mode, a responsive layout with a mobile drawer, toasts and a loading indicator. Games are saved in `localStorage`.
 
 ## Run it
@@ -46,5 +47,6 @@ src/components/GameSidebar.tsx      game / team / outcome / odds inputs, balance
 src/components/GraphView.tsx        decision tree + layered flow (React Flow)
 src/components/TableView.tsx        virtualised, sortable, filterable table + CSV
 src/components/ProbabilityPanel.tsx probability summary
+src/components/Welcome.tsx          welcome guide shown when there are no games
 src/App.tsx                         layout, top bar, tabs, toasts, large-set warning
 ```
